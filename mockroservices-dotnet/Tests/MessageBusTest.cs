@@ -15,6 +15,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace VaughnVernon.Mockroservices
 {
@@ -43,7 +44,7 @@ namespace VaughnVernon.Mockroservices
         [TestMethod]
         public void TestTopicPubSub()
         {
-            MessageBus messageBus = MessageBus.Start("test_bus");
+            MessageBus messageBus = MessageBus.Start("test_bus2");
             Topic topic = messageBus.OpenTopic("test_topic");
             MessageBusTestSubscriber subscriber = new MessageBusTestSubscriber();
             topic.Subscribe(subscriber);
