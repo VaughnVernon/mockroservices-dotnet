@@ -13,6 +13,7 @@
 //   limitations under the License.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace VaughnVernon.Mockroservices
 {
@@ -20,13 +21,19 @@ namespace VaughnVernon.Mockroservices
     {
         public static string Serialize(object instance)
         {
-            string serialization = JsonConvert.SerializeObject(instance);
+            string serialization = JsonConvert.SerializeObject(instance, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
             return serialization;
         }
-        
+
         public static T Deserialize<T>(string serialization)
         {
-            T deserialized = JsonConvert.DeserializeObject<T>(serialization);
+            T deserialized = JsonConvert.DeserializeObject<T>(serialization, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
             return deserialized;
         }
     }

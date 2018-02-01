@@ -161,17 +161,14 @@ namespace VaughnVernon.Mockroservices
     {
         public string Description { get; private set; }
         public string Name { get; private set; }
-        public DateTime OccurredOn { get; private set; }
         public long Price { get; private set; }
-        public int EventVersion { get; private set; }
 
         public ProductDefined(string name, string description, long price)
+            : base()
         {
             this.Name = name;
             this.Description = description;
             this.Price = price;
-            this.OccurredOn = DateTime.Now;
-            this.EventVersion = 1;
         }
 
         public override bool Equals(object other)
@@ -198,14 +195,11 @@ namespace VaughnVernon.Mockroservices
     public class ProductDescriptionChanged : DomainEvent
     {
         public string Description { get; private set; }
-        public DateTime OccurredOn { get; private set; }
-        public int EventVersion { get; private set; }
 
         public ProductDescriptionChanged(string description)
+            : base()
         {
             this.Description = description;
-            this.OccurredOn = DateTime.Now;
-            this.EventVersion = 1;
         }
 
         public override bool Equals(object other)
@@ -230,14 +224,11 @@ namespace VaughnVernon.Mockroservices
     public class ProductNameChanged : DomainEvent
     {
         public string Name { get; private set; }
-        public DateTime OccurredOn { get; private set; }
-        public int EventVersion { get; private set; }
 
         public ProductNameChanged(string name)
+            : base()
         {
             this.Name = name;
-            this.OccurredOn = DateTime.Now;
-            this.EventVersion = 1;
         }
 
         public override bool Equals(object other)
@@ -262,14 +253,11 @@ namespace VaughnVernon.Mockroservices
     public class ProductPriceChanged : DomainEvent
     {
         public long Price { get; private set; }
-        public DateTime OccurredOn { get; private set; }
-        public int EventVersion { get; private set; }
 
         public ProductPriceChanged(long price)
+            : base()
         {
             this.Price = price;
-            this.OccurredOn = DateTime.Now;
-            this.EventVersion = 1;
         }
 
         public override bool Equals(object other)

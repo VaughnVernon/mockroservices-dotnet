@@ -17,7 +17,7 @@ namespace VaughnVernon.Mockroservices
 				KVStore openStore = stores[name];
 				return openStore;
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				// ignore
 			}

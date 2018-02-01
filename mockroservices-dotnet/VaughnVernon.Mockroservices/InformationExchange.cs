@@ -13,7 +13,8 @@
 //   limitations under the License.
 
 using System;
-using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace VaughnVernon.Mockroservices
 {
@@ -26,18 +27,20 @@ namespace VaughnVernon.Mockroservices
 
         protected dynamic Parse(string representation)
         {
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
-            return serializer.Deserialize<dynamic>(representation);
+            return JsonConvert.DeserializeObject(representation, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
         }
 
         protected dynamic Representation { get; private set; }
 
-		public long LongValue(string key)
-		{
-			return Representation[key];
-		}
+        public long LongValue(string key)
+        {
+            return Representation[key];
+        }
 
-		protected string StringValue(string key)
+        protected string StringValue(string key)
         {
             return Representation[key];
         }
@@ -53,15 +56,18 @@ namespace VaughnVernon.Mockroservices
         public MessageExchangeReader(Message message)
             : base(message.Payload)
         {
-            DynamicPayload = new JavaScriptSerializer().Deserialize<dynamic>(message.Payload);
-			Message = message;
+            DynamicPayload = JsonConvert.DeserializeObject(message.Payload, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
+            Message = message;
         }
 
         public string Id
         {
             get
             {
-				return Message.Id;
+                return Message.Id;
             }
         }
 
@@ -69,11 +75,11 @@ namespace VaughnVernon.Mockroservices
         {
             get
             {
-				return long.Parse(Message.Id);
+                return long.Parse(Message.Id);
             }
         }
 
-		public string Type
+        public string Type
         {
             get
             {
@@ -89,8 +95,8 @@ namespace VaughnVernon.Mockroservices
 
         public DateTime PayloadDateTimeValue(string key)
         {
-            string stringValue = PayloadStringValue(key);
-            return DateTime.Parse(stringValue);
+            long longValue = PayloadLongValue(key);
+            return new DateTime(longValue);
         }
 
         public double PayloadDoubleValue(string key)
@@ -114,6 +120,6 @@ namespace VaughnVernon.Mockroservices
         }
 
         protected dynamic DynamicPayload { get; private set; }
-		protected Message Message { get; private set; }
-	}
+        protected Message Message { get; private set; }
+    }
 }

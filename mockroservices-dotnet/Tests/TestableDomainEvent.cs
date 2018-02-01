@@ -18,17 +18,14 @@ namespace VaughnVernon.Mockroservices
 {
     public class TestableDomainEvent : DomainEvent
     {
-        public int EventVersion { get; private set; }
         public long Id { get; private set; }
         public string Name { get; private set; }
-        public DateTime OccurredOn { get; private set; }
 
         public TestableDomainEvent(long id, string name)
+            : base()
         {
             this.Id = id;
             this.Name = name;
-            this.EventVersion = 1;
-            this.OccurredOn = DateTime.Now;
         }
     }
 }
