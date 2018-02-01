@@ -58,7 +58,7 @@ namespace VaughnVernon.Mockroservices
             DispatchWhen(domainEvent);
         }
 
-        private void DispatchWhen(DomainEvent domainEvent)
+        protected void DispatchWhen(DomainEvent domainEvent)
         {
             ((dynamic) this).When((dynamic) domainEvent);
         }
