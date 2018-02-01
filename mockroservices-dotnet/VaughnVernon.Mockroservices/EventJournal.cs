@@ -67,21 +67,27 @@ namespace VaughnVernon.Mockroservices
             return new EventStreamReader(this);
         }
 
-        public void Write(string streamName, int streamVersion, string type, string body)
+        public void Write(EventBatch batch)
         {
             lock (store)
             {
-                store.Add(new EventValue(streamName, streamVersion, type, body, ""));
-            }
-        }
+				foreach (EventBatch.Entry entry in batch.Entries)
+				{
+					store.Add(new EventValue("", 0, entry.Type, entry.Body, ""));
+				}
+			}
+		}
 
-        public void Write(string streamName, int streamVersion, string type, string body, string snapshot)
+        public void Write(String streamName, int streamVersion, EventBatch batch)
         {
             lock (store)
             {
-                store.Add(new EventValue(streamName, streamVersion, type, body, snapshot));
-            }
-        }
+				foreach (EventBatch.Entry entry in batch.Entries)
+				{
+					store.Add(new EventValue(streamName, streamVersion, entry.Type, entry.Body, entry.Snapshot));
+				}
+			}
+		}
 
         protected EventJournal(string name)
         {
@@ -255,14 +261,14 @@ namespace VaughnVernon.Mockroservices
         public string Snapshot { get; private set; }
         public List<EventValue> Stream { get; private set; }
         public string StreamName { get; private set; }
-        public long StreamVersion { get; private set; }
+        public int StreamVersion { get; private set; }
 
         public bool HasSnapshot()
         {
             return Snapshot.Length > 0;
         }
 
-        internal EventStream(string streamName, long streamVersion, List<EventValue> stream, string snapshot)
+        internal EventStream(string streamName, int streamVersion, List<EventValue> stream, string snapshot)
         {
             this.StreamName = streamName;
             this.StreamVersion = streamVersion;
@@ -384,4 +390,94 @@ namespace VaughnVernon.Mockroservices
             this.EventValue = eventValue;
         }
     }
+
+	public class EventBatch
+	{
+		public List<Entry> Entries { get; private set; }
+
+		public static EventBatch Of(String type, String body)
+		{
+			return new EventBatch(type, body);
+		}
+
+		public static EventBatch Of(String type, String body, String snapshot)
+		{
+			return new EventBatch(type, body, snapshot);
+		}
+
+		public EventBatch()
+			: this(2)
+		{
+		}
+
+		public EventBatch(int entries)
+		{
+			this.Entries = new List<Entry>(entries);
+		}
+
+		public EventBatch(String type, String body)
+			: this(type, body, "")
+		{
+		}
+
+		public EventBatch(String type, String body, String snapshot)
+			: this()
+		{
+			this.AddEntry(type, body, snapshot);
+		}
+
+		public void AddEntry(String type, String body)
+		{
+			this.Entries.Add(new Entry(type, body));
+		}
+
+		public void AddEntry(String type, String body, String snapshot)
+		{
+			this.Entries.Add(new Entry(type, body, snapshot));
+		}
+
+		public class Entry
+		{
+			public String Body { get; private set; }
+			public String Type { get; private set; }
+			public String Snapshot { get; private set; }
+
+			internal Entry(String type, String body)
+				: this(type, body, "")
+			{
+			}
+
+			internal Entry(String type, String body, String snapshot)
+			{
+				this.Type = type;
+				this.Body = body;
+				this.Snapshot = snapshot;
+			}
+		}
+	}
+
+	public abstract class EventSourceRepository
+	{
+		protected EventBatch ToBatch(List<DomainEvent> domainEvents)
+		{
+			EventBatch batch = new EventBatch(domainEvents.Count);
+			foreach (DomainEvent domainEvent in domainEvents)
+			{
+				string eventBody = Serialization.Serialize(domainEvent);
+				batch.AddEntry(domainEvent.GetType().Name, eventBody);
+			}
+			return batch;
+		}
+
+		protected List<DomainEvent> ToEvents(List<EventValue> stream)
+		{
+			List<DomainEvent> eventStream = new List<DomainEvent>(stream.Count);
+			foreach (EventValue value in stream)
+			{
+				DomainEvent domainEvent = Serialization.Deserialize<DomainEvent>(value.Body);
+				eventStream.Add(domainEvent);
+			}
+			return eventStream;
+		}
+	}
 }

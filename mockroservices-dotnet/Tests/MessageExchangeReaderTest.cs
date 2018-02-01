@@ -27,7 +27,7 @@ namespace VaughnVernon.Mockroservices
             string serializedDomainEvent = Serialization.Serialize(domainEvent);
             Message eventMessage = new Message(Convert.ToString(domainEvent.Id), domainEvent.GetType().Name, serializedDomainEvent);
             string serializedMessage = Serialization.Serialize(eventMessage);
-            MessageExchangeReader reader = MessageExchangeReader.From(serializedMessage);
+            MessageExchangeReader reader = MessageExchangeReader.From(eventMessage);
             Assert.AreEqual(eventMessage.Id, reader.Id);
             Assert.AreEqual(eventMessage.Type, reader.Type);
             Assert.AreEqual(domainEvent.Id, reader.IdAsLong);

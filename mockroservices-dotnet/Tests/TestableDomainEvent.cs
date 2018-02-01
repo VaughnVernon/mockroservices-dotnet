@@ -16,7 +16,7 @@ using System;
 
 namespace VaughnVernon.Mockroservices
 {
-    public class TestableDomainEvent : IDomainEvent
+    public class TestableDomainEvent : DomainEvent
     {
         public int EventVersion { get; private set; }
         public long Id { get; private set; }

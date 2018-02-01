@@ -18,10 +18,10 @@ namespace VaughnVernon.Mockroservices
 {
     public abstract class EventSourcedRootEntity
     {
-        private readonly List<IDomainEvent> mutatingEvents;
+        private readonly List<DomainEvent> mutatingEvents;
         private readonly int unmutatedVersion;
 
-        public List<IDomainEvent> MutatingEvents
+        public List<DomainEvent> MutatingEvents
         {
             get { return this.mutatingEvents; }
         }
@@ -38,13 +38,13 @@ namespace VaughnVernon.Mockroservices
 
         protected EventSourcedRootEntity()
         {
-            this.mutatingEvents = new List<IDomainEvent>();
+            this.mutatingEvents = new List<DomainEvent>();
             this.unmutatedVersion = 0;
         }
 
-        protected EventSourcedRootEntity(List<IDomainEvent> stream, int streamVersion)
+        protected EventSourcedRootEntity(List<DomainEvent> stream, int streamVersion)
         {
-            foreach (IDomainEvent domainEvent in stream)
+            foreach (DomainEvent domainEvent in stream)
             {
                 DispatchWhen(domainEvent);
             }
@@ -52,13 +52,13 @@ namespace VaughnVernon.Mockroservices
             this.unmutatedVersion = streamVersion;
         }
 
-        protected void Apply(IDomainEvent domainEvent)
+        protected void Apply(DomainEvent domainEvent)
         {
             mutatingEvents.Add(domainEvent);
             DispatchWhen(domainEvent);
         }
 
-        private void DispatchWhen(IDomainEvent domainEvent)
+        private void DispatchWhen(DomainEvent domainEvent)
         {
             ((dynamic) this).When((dynamic) domainEvent);
         }
