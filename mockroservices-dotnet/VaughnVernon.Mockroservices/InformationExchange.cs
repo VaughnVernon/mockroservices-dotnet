@@ -32,7 +32,12 @@ namespace VaughnVernon.Mockroservices
 
         protected dynamic Representation { get; private set; }
 
-        protected string StringValue(string key)
+		public long LongValue(string key)
+		{
+			return Representation[key];
+		}
+
+		protected string StringValue(string key)
         {
             return Representation[key];
         }
@@ -40,23 +45,23 @@ namespace VaughnVernon.Mockroservices
 
     public class MessageExchangeReader : InformationExchangeReader
     {
-        public static MessageExchangeReader From(string representation)
+        public static MessageExchangeReader From(Message message)
         {
-            return new MessageExchangeReader(representation);
+            return new MessageExchangeReader(message);
         }
 
-        public MessageExchangeReader(string representation)
-            : base(representation)
+        public MessageExchangeReader(Message message)
+            : base(message.Payload)
         {
-            DynamicPayload = new JavaScriptSerializer().Deserialize<dynamic>(Payload);
+            DynamicPayload = new JavaScriptSerializer().Deserialize<dynamic>(message.Payload);
+			Message = message;
         }
 
         public string Id
         {
             get
             {
-                string id = StringValue("Id");
-                return id;
+				return Message.Id;
             }
         }
 
@@ -64,17 +69,15 @@ namespace VaughnVernon.Mockroservices
         {
             get
             {
-                string id = StringValue("Id");
-                return Convert.ToInt64(id);
+				return long.Parse(Message.Id);
             }
         }
 
-        public string Type
+		public string Type
         {
             get
             {
-                string type = StringValue("Type");
-                return type;
+                return Message.Type;
             }
         }
 
@@ -111,14 +114,6 @@ namespace VaughnVernon.Mockroservices
         }
 
         protected dynamic DynamicPayload { get; private set; }
-
-        protected string Payload
-        {
-            get
-            {
-                string type = StringValue("Payload");
-                return type;
-            }
-        }
-    }
+		protected Message Message { get; private set; }
+	}
 }

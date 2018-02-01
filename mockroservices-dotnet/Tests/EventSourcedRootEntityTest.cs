@@ -95,7 +95,7 @@ namespace VaughnVernon.Mockroservices
             Apply(new ProductDefined(name, description, price));
         }
 
-        public Product(List<IDomainEvent> eventStream, int streamVersion)
+        public Product(List<DomainEvent> eventStream, int streamVersion)
             : base(eventStream, streamVersion)
         {
         }
@@ -157,7 +157,7 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class ProductDefined : IDomainEvent
+    public class ProductDefined : DomainEvent
     {
         public string Description { get; private set; }
         public string Name { get; private set; }
@@ -195,7 +195,7 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class ProductDescriptionChanged : IDomainEvent
+    public class ProductDescriptionChanged : DomainEvent
     {
         public string Description { get; private set; }
         public DateTime OccurredOn { get; private set; }
@@ -227,7 +227,7 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class ProductNameChanged : IDomainEvent
+    public class ProductNameChanged : DomainEvent
     {
         public string Name { get; private set; }
         public DateTime OccurredOn { get; private set; }
@@ -259,7 +259,7 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class ProductPriceChanged : IDomainEvent
+    public class ProductPriceChanged : DomainEvent
     {
         public long Price { get; private set; }
         public DateTime OccurredOn { get; private set; }
