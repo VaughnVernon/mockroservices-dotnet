@@ -32,7 +32,7 @@ namespace VaughnVernon.Mockroservices
             Assert.AreEqual(eventMessage.Type, reader.Type);
             Assert.AreEqual(domainEvent.Id, reader.IdAsLong);
             Assert.AreEqual(domainEvent.Name, reader.PayloadStringValue("Name"));
-            Assert.AreEqual(domainEvent.EventVersion, (int)reader.PayloadIntegerValue("EventVersion"));
+            Assert.AreEqual(domainEvent.EventVersion, reader.PayloadIntegerValue("EventVersion"));
             Assert.AreEqual(domainEvent.OccurredOn, reader.PayloadDateTimeValue("OccurredOn"));
         }
     }
