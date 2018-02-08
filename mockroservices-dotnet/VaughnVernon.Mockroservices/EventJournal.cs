@@ -464,7 +464,7 @@ namespace VaughnVernon.Mockroservices
 			foreach (DomainEvent domainEvent in domainEvents)
 			{
 				string eventBody = Serialization.Serialize(domainEvent);
-				batch.AddEntry(domainEvent.GetType().Name, eventBody);
+				batch.AddEntry(domainEvent.GetType().FullName, eventBody);
 			}
 			return batch;
 		}
@@ -474,7 +474,8 @@ namespace VaughnVernon.Mockroservices
 			List<DomainEvent> eventStream = new List<DomainEvent>(stream.Count);
 			foreach (EventValue value in stream)
 			{
-				DomainEvent domainEvent = Serialization.Deserialize<DomainEvent>(value.Body);
+                Type eventType = Type.GetType(value.Type);
+				DomainEvent domainEvent = (DomainEvent)Serialization.Deserialize(value.Body, eventType);
 				eventStream.Add(domainEvent);
 			}
 			return eventStream;

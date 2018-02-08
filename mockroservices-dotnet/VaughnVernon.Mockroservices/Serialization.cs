@@ -14,6 +14,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
 
 namespace VaughnVernon.Mockroservices
 {
@@ -34,6 +35,16 @@ namespace VaughnVernon.Mockroservices
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             });
+            return deserialized;
+        }
+
+        public static object Deserialize(string serialization, Type type)
+        {
+            object deserialized = JsonConvert.DeserializeObject(serialization, type, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
+
             return deserialized;
         }
     }
