@@ -464,7 +464,7 @@ namespace VaughnVernon.Mockroservices
 			foreach (DomainEvent domainEvent in domainEvents)
 			{
 				string eventBody = Serialization.Serialize(domainEvent);
-				batch.AddEntry(domainEvent.GetType().FullName, eventBody);
+				batch.AddEntry(domainEvent.GetType().AssemblyQualifiedName, eventBody);
 			}
 			return batch;
 		}
