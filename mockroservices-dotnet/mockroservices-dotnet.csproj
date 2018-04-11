@@ -77,6 +77,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="JsonNet.PrivateSettersContractResolvers\PrivateSettersContractResolvers.cs" />
     <Compile Include="Tests\KVStoreTest.cs" />
     <Compile Include="Tests\RepositoryTest.cs" />
     <Compile Include="VaughnVernon.Mockroservices\KVStore.cs" />
