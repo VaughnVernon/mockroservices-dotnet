@@ -42,6 +42,16 @@ namespace VaughnVernon.Mockroservices
             Assert.AreEqual(person.Name, clientPerson.Name);
             Assert.AreEqual(person.BirthDate, clientPerson.BirthDate);
         }
+
+        [TestMethod]
+        public void TestDeserializationAgainstPrivateSetter()
+        {
+            Person person = new Person("First Middle Last, Jr.", DateTime.Now);
+            string jsonPerson = Serialization.Serialize(person);
+            var clientPerson = Serialization.Deserialize<ClientPersonWithPrivateSetter>(jsonPerson);
+            Assert.AreEqual(person.Name, clientPerson.Name);
+            Assert.AreEqual(person.BirthDate, clientPerson.BirthDate);
+        }
     }
 
     public class Person
@@ -77,5 +87,25 @@ namespace VaughnVernon.Mockroservices
     {
         public String Name { get; set; }
         public DateTime BirthDate { get; set; }
+    }
+
+    public class ClientPersonWithPrivateSetter
+    {
+        public String Name { get; private set; }
+        public DateTime BirthDate { get; private set; }
+
+        public ClientPersonWithPrivateSetter() { }
+
+        public static ClientPersonWithPrivateSetter Instance(
+            string name, DateTime birthDate)
+        {
+            return new ClientPersonWithPrivateSetter(
+                name, birthDate);
+        }
+        private ClientPersonWithPrivateSetter(string name, DateTime birthDate)
+        {
+            Name = name;
+            BirthDate = birthDate;
+        }
     }
 }

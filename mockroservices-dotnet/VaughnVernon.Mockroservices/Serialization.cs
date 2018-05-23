@@ -12,6 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+using JsonNet.PrivateSettersContractResolvers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -33,7 +34,8 @@ namespace VaughnVernon.Mockroservices
         {
             T deserialized = JsonConvert.DeserializeObject<T>(serialization, new JsonSerializerSettings
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                //ContractResolver = new CamelCasePropertyNamesContractResolver()
+                ContractResolver = new PrivateSetterCamelCasePropertyNamesContractResolver()
             });
             return deserialized;
         }
@@ -42,7 +44,8 @@ namespace VaughnVernon.Mockroservices
         {
             object deserialized = JsonConvert.DeserializeObject(serialization, type, new JsonSerializerSettings
             {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                //ContractResolver = new CamelCasePropertyNamesContractResolver()
+                ContractResolver = new PrivateSetterCamelCasePropertyNamesContractResolver()
             });
 
             return deserialized;
