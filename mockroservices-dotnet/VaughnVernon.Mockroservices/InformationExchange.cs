@@ -14,6 +14,7 @@
 
 using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace VaughnVernon.Mockroservices
@@ -117,6 +118,22 @@ namespace VaughnVernon.Mockroservices
         public string PayloadStringValue(string key)
         {
             return DynamicPayload[key];
+        }
+
+        public string[] PayloadStringArrayValue(string key)
+        {
+            if (!(DynamicPayload[key] is JArray serializedArray) || serializedArray.Count == 0)
+            {
+                return new string[0];
+            }
+
+            string[] result = new string[serializedArray.Count];
+
+            for (int i = 0; i < serializedArray.Count; i++)
+            {
+                result[i] = serializedArray[i].Value<string>();
+            }
+            return result;
         }
 
         protected dynamic DynamicPayload { get; private set; }
