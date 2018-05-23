@@ -117,7 +117,7 @@ namespace VaughnVernon.Mockroservices
             {
                 List<EventValue> values = new List<EventValue>();
                 List<EventValue> storeCopy = new List<EventValue>(store);
-                string latestSnapshot = "";
+                EventValue latestSnapshotValue = null;
 
                 foreach (EventValue value in storeCopy)
                 {
@@ -126,15 +126,19 @@ namespace VaughnVernon.Mockroservices
                         if (value.HasSnapshot())
                         {
                             values.Clear();
-                            latestSnapshot = value.Snapshot;
+                            latestSnapshotValue = value;
                         }
-                        values.Add(value);
+                        else
+                        {
+                            values.Add(value);
+                        }
                     }
                 }
 
-                int streamVersion = values.Count == 0 ? 0 : values[values.Count - 1].StreamVersion;
+                int snapshotVersion = latestSnapshotValue == null ? 0 : latestSnapshotValue.StreamVersion;
+                int streamVersion = values.Count == 0 ? snapshotVersion : values[values.Count - 1].StreamVersion;
 
-                return new EventStream(streamName, streamVersion, values, latestSnapshot);
+                return new EventStream(streamName, streamVersion, values, latestSnapshotValue == null ? "" : latestSnapshotValue.Snapshot);
             }
         }
     }

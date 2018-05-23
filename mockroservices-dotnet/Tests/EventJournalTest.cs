@@ -106,17 +106,14 @@ namespace VaughnVernon.Mockroservices
             EventStream eventStream123 = streamReader.StreamFor("name123");
             Assert.AreEqual("name123", eventStream123.StreamName);
             Assert.AreEqual(3, eventStream123.StreamVersion);
-            Assert.AreEqual(2, eventStream123.Stream.Count);
+            Assert.AreEqual(1, eventStream123.Stream.Count);
             Assert.AreEqual("SNAPSHOT123-2", eventStream123.Snapshot);
-            Assert.AreEqual(new EventValue("name123", 2, "type1-1", "type1-1_instance1", "SNAPSHOT123-2"), eventStream123.Stream[0]);
-            Assert.AreEqual(new EventValue("name123", 3, "type1-2", "type1-2_instance1", ""), eventStream123.Stream[1]);
 
             EventStream eventStream456 = streamReader.StreamFor("name456");
             Assert.AreEqual("name456", eventStream456.StreamName);
             Assert.AreEqual(2, eventStream456.StreamVersion);
-            Assert.AreEqual(1, eventStream456.Stream.Count);
+            Assert.AreEqual(0, eventStream456.Stream.Count);
             Assert.AreEqual("SNAPSHOT456-2", eventStream456.Snapshot);
-            Assert.AreEqual(new EventValue("name456", 2, "type2-1", "type2-1_instance1", "SNAPSHOT456-2"), eventStream456.Stream[0]);
 
             journal.Close();
         }
