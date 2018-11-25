@@ -12,10 +12,9 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Tests
 {
     [TestClass]
     public class EventJournalTest
@@ -51,9 +50,9 @@ namespace VaughnVernon.Mockroservices
         public void TestWriteRead()
         {
             EventJournal journal = EventJournal.Open("test");
-            journal.Write("name123", 1, "type1", "type1_instance1");
-            journal.Write("name456", 1, "type2", "type2_instance1");
-            EventJournalReader reader = journal.Reader("test_reader");
+			journal.Write("name123", 1, EventBatch.Of("type1", "type1_instance1"));
+			journal.Write("name456", 1, EventBatch.Of("type2", "type2_instance1"));
+			EventJournalReader reader = journal.Reader("test_reader");
             Assert.AreEqual(new StoredEvent(0, new EventValue("name123", 1, "type1", "type1_instance1", "")), reader.ReadNext());
             reader.Acknowledge(0);
             Assert.AreEqual(new StoredEvent(1, new EventValue("name456", 1, "type2", "type2_instance1", "")), reader.ReadNext());
@@ -66,14 +65,14 @@ namespace VaughnVernon.Mockroservices
         [TestMethod]
         public void TestWriteReadStream()
         {
-            EventJournal journal = EventJournal.Open("test");
-            journal.Write("name123", 1, "type1", "type1_instance1");
-            journal.Write("name456", 1, "type2", "type2_instance1");
-            journal.Write("name123", 2, "type1-1", "type1-1_instance1");
-            journal.Write("name123", 3, "type1-2", "type1-2_instance1");
-            journal.Write("name456", 2, "type2-1", "type2-1_instance1");
+			EventJournal journal = EventJournal.Open("test");
+			journal.Write("name123", 1, EventBatch.Of("type1", "type1_instance1"));
+			journal.Write("name456", 1, EventBatch.Of("type2", "type2_instance1"));
+			journal.Write("name123", 2, EventBatch.Of("type1-1", "type1-1_instance1"));
+			journal.Write("name123", 3, EventBatch.Of("type1-2", "type1-2_instance1"));
+			journal.Write("name456", 2, EventBatch.Of("type2-1", "type2-1_instance1"));
 
-            EventStreamReader streamReader = journal.StreamReader();
+			EventStreamReader streamReader = journal.StreamReader();
 
             EventStream eventStream123 = streamReader.StreamFor("name123");
             Assert.AreEqual(3, eventStream123.StreamVersion);
@@ -95,28 +94,25 @@ namespace VaughnVernon.Mockroservices
         public void TestWriteReadStreamSnapshot()
         {
             EventJournal journal = EventJournal.Open("test");
-            journal.Write("name123", 1, "type1", "type1_instance1", "SNAPSHOT123-1");
-            journal.Write("name456", 1, "type2", "type2_instance1", "SNAPSHOT456-1");
-            journal.Write("name123", 2, "type1-1", "type1-1_instance1", "SNAPSHOT123-2");
-            journal.Write("name123", 3, "type1-2", "type1-2_instance1");
-            journal.Write("name456", 2, "type2-1", "type2-1_instance1", "SNAPSHOT456-2");
+			journal.Write("name123", 1, EventBatch.Of("type1", "type1_instance1", "SNAPSHOT123-1"));
+			journal.Write("name456", 1, EventBatch.Of("type2", "type2_instance1", "SNAPSHOT456-1"));
+			journal.Write("name123", 2, EventBatch.Of("type1-1", "type1-1_instance1", "SNAPSHOT123-2"));
+			journal.Write("name123", 3, EventBatch.Of("type1-2", "type1-2_instance1"));
+			journal.Write("name456", 2, EventBatch.Of("type2-1", "type2-1_instance1", "SNAPSHOT456-2"));
 
-            EventStreamReader streamReader = journal.StreamReader();
+			EventStreamReader streamReader = journal.StreamReader();
 
             EventStream eventStream123 = streamReader.StreamFor("name123");
             Assert.AreEqual("name123", eventStream123.StreamName);
             Assert.AreEqual(3, eventStream123.StreamVersion);
-            Assert.AreEqual(2, eventStream123.Stream.Count);
+            Assert.AreEqual(1, eventStream123.Stream.Count);
             Assert.AreEqual("SNAPSHOT123-2", eventStream123.Snapshot);
-            Assert.AreEqual(new EventValue("name123", 2, "type1-1", "type1-1_instance1", "SNAPSHOT123-2"), eventStream123.Stream[0]);
-            Assert.AreEqual(new EventValue("name123", 3, "type1-2", "type1-2_instance1", ""), eventStream123.Stream[1]);
 
             EventStream eventStream456 = streamReader.StreamFor("name456");
             Assert.AreEqual("name456", eventStream456.StreamName);
             Assert.AreEqual(2, eventStream456.StreamVersion);
-            Assert.AreEqual(1, eventStream456.Stream.Count);
+            Assert.AreEqual(0, eventStream456.Stream.Count);
             Assert.AreEqual("SNAPSHOT456-2", eventStream456.Snapshot);
-            Assert.AreEqual(new EventValue("name456", 2, "type2-1", "type2-1_instance1", "SNAPSHOT456-2"), eventStream456.Stream[0]);
 
             journal.Close();
         }

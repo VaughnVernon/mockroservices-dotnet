@@ -15,7 +15,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Tests
 {
     [TestClass]
     public class SerializationTest
@@ -42,40 +42,15 @@ namespace VaughnVernon.Mockroservices
             Assert.AreEqual(person.Name, clientPerson.Name);
             Assert.AreEqual(person.BirthDate, clientPerson.BirthDate);
         }
-    }
 
-    public class Person
-    {
-        public DateTime BirthDate { get; private set; }
-        public string Name { get; private set; }
-
-        public override bool Equals(object other)
+        [TestMethod]
+        public void TestDeserializationAgainstPrivateSetter()
         {
-            if (other == null || other.GetType() != typeof(Person))
-            {
-                return false;
-            }
-
-            Person otherPerson = (Person)other;
-
-            return this.Name.Equals(otherPerson.Name) && this.BirthDate.Equals(otherPerson.BirthDate);
+            Person person = new Person("First Middle Last, Jr.", DateTime.Now);
+            string jsonPerson = Serialization.Serialize(person);
+            var clientPerson = Serialization.Deserialize<ClientPersonWithPrivateSetter>(jsonPerson);
+            Assert.AreEqual(person.Name, clientPerson.Name);
+            Assert.AreEqual(person.BirthDate, clientPerson.BirthDate);
         }
-
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() + BirthDate.GetHashCode();
-        }
-
-        public Person(string name, DateTime birthDate)
-        {
-            this.Name = name;
-            this.BirthDate = birthDate;
-        }
-    }
-
-    public class ClientPerson
-    {
-        public String Name { get; set; }
-        public DateTime BirthDate { get; set; }
     }
 }

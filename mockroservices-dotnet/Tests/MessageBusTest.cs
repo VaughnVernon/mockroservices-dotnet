@@ -17,7 +17,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Tests
 {
     [TestClass]
     public class MessageBusTest

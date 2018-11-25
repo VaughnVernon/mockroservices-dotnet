@@ -12,20 +12,25 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-using System;
+using System.Collections.Generic;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.VaughnVernon.Mockroservices
 {
-    public class TestableDomainEvent : DomainEvent
+    public abstract class ProcessManager : SourcedEntity<Command>
     {
-        public long Id { get; private set; }
-        public string Name { get; private set; }
+        protected ProcessManager(List<Command> stream, int streamVersion)
+            : base(stream, streamVersion)
+        {
+        }
 
-        public TestableDomainEvent(long id, string name)
+        protected ProcessManager()
             : base()
         {
-            this.Id = id;
-            this.Name = name;
+        }
+
+        protected void Process(Command command)
+        {
+            Apply(command);
         }
     }
 }

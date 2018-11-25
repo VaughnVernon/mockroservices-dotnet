@@ -13,7 +13,9 @@
 //   limitations under the License.
 
 using System;
-using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace VaughnVernon.Mockroservices
 {
@@ -26,11 +28,18 @@ namespace VaughnVernon.Mockroservices
 
         protected dynamic Parse(string representation)
         {
-            JavaScriptSerializer serializer = new JavaScriptSerializer();
-            return serializer.Deserialize<dynamic>(representation);
+            return JsonConvert.DeserializeObject(representation, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
         }
 
         protected dynamic Representation { get; private set; }
+
+        public long LongValue(string key)
+        {
+            return Representation[key];
+        }
 
         protected string StringValue(string key)
         {
@@ -40,23 +49,26 @@ namespace VaughnVernon.Mockroservices
 
     public class MessageExchangeReader : InformationExchangeReader
     {
-        public static MessageExchangeReader From(string representation)
+        public static MessageExchangeReader From(Message message)
         {
-            return new MessageExchangeReader(representation);
+            return new MessageExchangeReader(message);
         }
 
-        public MessageExchangeReader(string representation)
-            : base(representation)
+        public MessageExchangeReader(Message message)
+            : base(message.Payload)
         {
-            DynamicPayload = new JavaScriptSerializer().Deserialize<dynamic>(Payload);
+            DynamicPayload = JsonConvert.DeserializeObject(message.Payload, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
+            Message = message;
         }
 
         public string Id
         {
             get
             {
-                string id = StringValue("Id");
-                return id;
+                return Message.Id;
             }
         }
 
@@ -64,8 +76,7 @@ namespace VaughnVernon.Mockroservices
         {
             get
             {
-                string id = StringValue("Id");
-                return Convert.ToInt64(id);
+                return long.Parse(Message.Id);
             }
         }
 
@@ -73,8 +84,7 @@ namespace VaughnVernon.Mockroservices
         {
             get
             {
-                string type = StringValue("Type");
-                return type;
+                return Message.Type;
             }
         }
 
@@ -86,8 +96,8 @@ namespace VaughnVernon.Mockroservices
 
         public DateTime PayloadDateTimeValue(string key)
         {
-            string stringValue = PayloadStringValue(key);
-            return DateTime.Parse(stringValue);
+            long longValue = PayloadLongValue(key);
+            return new DateTime(longValue);
         }
 
         public double PayloadDoubleValue(string key)
@@ -110,15 +120,23 @@ namespace VaughnVernon.Mockroservices
             return DynamicPayload[key];
         }
 
-        protected dynamic DynamicPayload { get; private set; }
-
-        protected string Payload
+        public string[] PayloadStringArrayValue(string key)
         {
-            get
+            if (!(DynamicPayload[key] is JArray serializedArray) || serializedArray.Count == 0)
             {
-                string type = StringValue("Payload");
-                return type;
+                return new string[0];
             }
+
+            string[] result = new string[serializedArray.Count];
+
+            for (int i = 0; i < serializedArray.Count; i++)
+            {
+                result[i] = serializedArray[i].Value<string>();
+            }
+            return result;
         }
+
+        protected dynamic DynamicPayload { get; private set; }
+        protected Message Message { get; private set; }
     }
 }

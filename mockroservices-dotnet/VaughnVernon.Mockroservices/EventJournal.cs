@@ -67,21 +67,27 @@ namespace VaughnVernon.Mockroservices
             return new EventStreamReader(this);
         }
 
-        public void Write(string streamName, int streamVersion, string type, string body)
+        public void Write(EventBatch batch)
         {
             lock (store)
             {
-                store.Add(new EventValue(streamName, streamVersion, type, body, ""));
-            }
-        }
+				foreach (EventBatch.Entry entry in batch.Entries)
+				{
+					store.Add(new EventValue("", 0, entry.Type, entry.Body, ""));
+				}
+			}
+		}
 
-        public void Write(string streamName, int streamVersion, string type, string body, string snapshot)
+        public void Write(string streamName, int streamVersion, EventBatch batch)
         {
             lock (store)
             {
-                store.Add(new EventValue(streamName, streamVersion, type, body, snapshot));
-            }
-        }
+				foreach (EventBatch.Entry entry in batch.Entries)
+				{
+					store.Add(new EventValue(streamName, streamVersion, entry.Type, entry.Body, entry.Snapshot));
+				}
+			}
+		}
 
         protected EventJournal(string name)
         {
@@ -111,7 +117,7 @@ namespace VaughnVernon.Mockroservices
             {
                 List<EventValue> values = new List<EventValue>();
                 List<EventValue> storeCopy = new List<EventValue>(store);
-                string latestSnapshot = "";
+                EventValue latestSnapshotValue = null;
 
                 foreach (EventValue value in storeCopy)
                 {
@@ -120,15 +126,19 @@ namespace VaughnVernon.Mockroservices
                         if (value.HasSnapshot())
                         {
                             values.Clear();
-                            latestSnapshot = value.Snapshot;
+                            latestSnapshotValue = value;
                         }
-                        values.Add(value);
+                        else
+                        {
+                            values.Add(value);
+                        }
                     }
                 }
 
-                int streamVersion = values.Count == 0 ? 0 : values[values.Count - 1].StreamVersion;
+                int snapshotVersion = latestSnapshotValue == null ? 0 : latestSnapshotValue.StreamVersion;
+                int streamVersion = values.Count == 0 ? snapshotVersion : values[values.Count - 1].StreamVersion;
 
-                return new EventStream(streamName, streamVersion, values, latestSnapshot);
+                return new EventStream(streamName, streamVersion, values, latestSnapshotValue == null ? "" : latestSnapshotValue.Snapshot);
             }
         }
     }
@@ -151,8 +161,6 @@ namespace VaughnVernon.Mockroservices
         public void Close()
         {
             closed = true;
-
-            dispatcherThread.Abort();
         }
 
         protected EventJournalPublisher(
@@ -255,14 +263,14 @@ namespace VaughnVernon.Mockroservices
         public string Snapshot { get; private set; }
         public List<EventValue> Stream { get; private set; }
         public string StreamName { get; private set; }
-        public long StreamVersion { get; private set; }
+        public int StreamVersion { get; private set; }
 
         public bool HasSnapshot()
         {
             return Snapshot.Length > 0;
         }
 
-        internal EventStream(string streamName, long streamVersion, List<EventValue> stream, string snapshot)
+        internal EventStream(string streamName, int streamVersion, List<EventValue> stream, string snapshot)
         {
             this.StreamName = streamName;
             this.StreamVersion = streamVersion;
@@ -384,4 +392,95 @@ namespace VaughnVernon.Mockroservices
             this.EventValue = eventValue;
         }
     }
+
+	public class EventBatch
+	{
+		public List<Entry> Entries { get; private set; }
+
+		public static EventBatch Of(string type, string body)
+		{
+			return new EventBatch(type, body);
+		}
+
+		public static EventBatch Of(string type, string body, string snapshot)
+		{
+			return new EventBatch(type, body, snapshot);
+		}
+
+		public EventBatch()
+			: this(2)
+		{
+		}
+
+		public EventBatch(int entries)
+		{
+			this.Entries = new List<Entry>(entries);
+		}
+
+		public EventBatch(string type, string body)
+			: this(type, body, "")
+		{
+		}
+
+		public EventBatch(string type, string body, string snapshot)
+			: this()
+		{
+			this.AddEntry(type, body, snapshot);
+		}
+
+		public void AddEntry(string type, string body)
+		{
+			this.Entries.Add(new Entry(type, body));
+		}
+
+		public void AddEntry(string type, string body, string snapshot)
+		{
+			this.Entries.Add(new Entry(type, body, snapshot));
+		}
+
+		public class Entry
+		{
+			public string Body { get; private set; }
+			public string Type { get; private set; }
+			public string Snapshot { get; private set; }
+
+			internal Entry(string type, string body)
+				: this(type, body, "")
+			{
+			}
+
+			internal Entry(string type, string body, string snapshot)
+			{
+				this.Type = type;
+				this.Body = body;
+				this.Snapshot = snapshot;
+			}
+		}
+	}
+
+	public abstract class EventSourceRepository
+	{
+		protected EventBatch ToBatch(List<DomainEvent> domainEvents)
+		{
+			EventBatch batch = new EventBatch(domainEvents.Count);
+			foreach (DomainEvent domainEvent in domainEvents)
+			{
+				string eventBody = Serialization.Serialize(domainEvent);
+				batch.AddEntry(domainEvent.GetType().AssemblyQualifiedName, eventBody);
+			}
+			return batch;
+		}
+
+		protected List<DomainEvent> ToEvents(List<EventValue> stream)
+		{
+			List<DomainEvent> eventStream = new List<DomainEvent>(stream.Count);
+			foreach (EventValue value in stream)
+			{
+                Type eventType = Type.GetType(value.Type);
+				DomainEvent domainEvent = (DomainEvent)Serialization.Deserialize(value.Body, eventType);
+				eventStream.Add(domainEvent);
+			}
+			return eventStream;
+		}
+	}
 }

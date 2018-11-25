@@ -15,7 +15,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Tests
 {
     [TestClass]
     public class MessageExchangeReaderTest
@@ -26,14 +26,13 @@ namespace VaughnVernon.Mockroservices
             TestableDomainEvent domainEvent = new TestableDomainEvent(1, "something");
             string serializedDomainEvent = Serialization.Serialize(domainEvent);
             Message eventMessage = new Message(Convert.ToString(domainEvent.Id), domainEvent.GetType().Name, serializedDomainEvent);
-            string serializedMessage = Serialization.Serialize(eventMessage);
-            MessageExchangeReader reader = MessageExchangeReader.From(serializedMessage);
+            MessageExchangeReader reader = MessageExchangeReader.From(eventMessage);
             Assert.AreEqual(eventMessage.Id, reader.Id);
             Assert.AreEqual(eventMessage.Type, reader.Type);
             Assert.AreEqual(domainEvent.Id, reader.IdAsLong);
-            Assert.AreEqual(domainEvent.Name, reader.PayloadStringValue("Name"));
-            Assert.AreEqual(domainEvent.EventVersion, (int)reader.PayloadIntegerValue("EventVersion"));
-            Assert.AreEqual(domainEvent.OccurredOn, reader.PayloadDateTimeValue("OccurredOn"));
+            Assert.AreEqual(domainEvent.Name, reader.PayloadStringValue("name"));
+            Assert.AreEqual(domainEvent.EventVersion, reader.PayloadIntegerValue("eventVersion"));
+            Assert.AreEqual(domainEvent.OccurredOn, reader.PayloadLongValue("occurredOn"));
         }
     }
 }

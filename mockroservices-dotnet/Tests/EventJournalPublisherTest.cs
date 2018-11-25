@@ -12,12 +12,11 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Tests
 {
     [TestClass]
     public class EventJournalPublisherTest
@@ -34,17 +33,21 @@ namespace VaughnVernon.Mockroservices
             EventJournalPublisherTestSubscriber subscriber = new EventJournalPublisherTestSubscriber();
             topic.Subscribe(subscriber);
 
-            for (int idx = 0; idx < 3; ++idx)
+			EventBatch batch1 = new EventBatch();
+			for (int idx = 0; idx < 3; ++idx)
             {
-                eventJournal.Write("test1", idx, "test1type", "test1instance" + idx);
+				batch1.AddEntry("test1type", "test1instance" + idx);
             }
+			eventJournal.Write("test1", 0, batch1);
 
-            for (int idx = 0; idx < 3; ++idx)
+			EventBatch batch2 = new EventBatch();
+			for (int idx = 0; idx < 3; ++idx)
             {
-                eventJournal.Write("test2", idx, "test2type", "test2instance" + idx);
+				batch2.AddEntry("test2type", "test2instance" + idx);
             }
+			eventJournal.Write("test2", 0, batch2);
 
-            subscriber.WaitForExpectedMessages(6);
+			subscriber.WaitForExpectedMessages(6);
 
             topic.Close();
 

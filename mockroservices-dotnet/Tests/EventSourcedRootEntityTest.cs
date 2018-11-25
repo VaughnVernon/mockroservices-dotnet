@@ -16,7 +16,7 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Tests
 {
     [TestClass]
     public class EventSourcedRootEntityTest
@@ -25,11 +25,11 @@ namespace VaughnVernon.Mockroservices
         public void TestProductDefinedEventKept()
         {
             Product product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
-            Assert.AreEqual(1, product.MutatingEvents.Count);
+            Assert.AreEqual(1, product.Applied.Count);
             Assert.AreEqual("dice-fuz-1", product.Name);
             Assert.AreEqual("Fuzzy dice.", product.Description);
             Assert.AreEqual(999, product.Price);
-            Assert.AreEqual(new ProductDefined("dice-fuz-1", "Fuzzy dice.", 999), product.MutatingEvents[0]);
+            Assert.AreEqual(new ProductDefined("dice-fuz-1", "Fuzzy dice.", 999), product.Applied[0]);
         }
 
         [TestMethod]
@@ -37,12 +37,12 @@ namespace VaughnVernon.Mockroservices
         {
             Product product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
 
-            product.MutatingEvents.Clear();
+            product.Applied.Clear();
 
             product.ChangeName("dice-fuzzy-1");
-            Assert.AreEqual(1, product.MutatingEvents.Count);
+            Assert.AreEqual(1, product.Applied.Count);
             Assert.AreEqual("dice-fuzzy-1", product.Name);
-            Assert.AreEqual(new ProductNameChanged("dice-fuzzy-1"), product.MutatingEvents[0]);
+            Assert.AreEqual(new ProductNameChanged("dice-fuzzy-1"), product.Applied[0]);
         }
 
         [TestMethod]
@@ -50,12 +50,12 @@ namespace VaughnVernon.Mockroservices
         {
             Product product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
 
-            product.MutatingEvents.Clear();
+            product.Applied.Clear();
 
             product.ChangeDescription("Fuzzy dice, and all.");
-            Assert.AreEqual(1, product.MutatingEvents.Count);
+            Assert.AreEqual(1, product.Applied.Count);
             Assert.AreEqual("Fuzzy dice, and all.", product.Description);
-            Assert.AreEqual(new ProductDescriptionChanged("Fuzzy dice, and all."), product.MutatingEvents[0]);
+            Assert.AreEqual(new ProductDescriptionChanged("Fuzzy dice, and all."), product.Applied[0]);
         }
 
         [TestMethod]
@@ -63,12 +63,12 @@ namespace VaughnVernon.Mockroservices
         {
             Product product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
 
-            product.MutatingEvents.Clear();
+            product.Applied.Clear();
 
             product.ChangePrice(995);
-            Assert.AreEqual(1, product.MutatingEvents.Count);
+            Assert.AreEqual(1, product.Applied.Count);
             Assert.AreEqual(995, product.Price);
-            Assert.AreEqual(new ProductPriceChanged(995), product.MutatingEvents[0]);
+            Assert.AreEqual(new ProductPriceChanged(995), product.Applied[0]);
         }
 
         [TestMethod]
@@ -79,12 +79,12 @@ namespace VaughnVernon.Mockroservices
             product.ChangeDescription("Fuzzy dice, and all.");
             product.ChangePrice(995);
 
-            Product productAgain = new Product(product.MutatingEvents, product.MutatedVersion);
+            Product productAgain = new Product(product.Applied, product.NextVersion);
             Assert.AreEqual(product, productAgain);
         }
     }
 
-    public class Product : EventSourcedRootEntity
+    public class Product : SourcedEntity<DomainEvent>
     {
         public string Name { get; private set; }
         public string Description { get; private set; }
@@ -95,7 +95,7 @@ namespace VaughnVernon.Mockroservices
             Apply(new ProductDefined(name, description, price));
         }
 
-        public Product(List<IDomainEvent> eventStream, int streamVersion)
+        public Product(List<DomainEvent> eventStream, int streamVersion)
             : base(eventStream, streamVersion)
         {
         }
@@ -157,21 +157,18 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class ProductDefined : IDomainEvent
+    public class ProductDefined : DomainEvent
     {
         public string Description { get; private set; }
         public string Name { get; private set; }
-        public DateTime OccurredOn { get; private set; }
         public long Price { get; private set; }
-        public int EventVersion { get; private set; }
 
         public ProductDefined(string name, string description, long price)
+            : base()
         {
             this.Name = name;
             this.Description = description;
             this.Price = price;
-            this.OccurredOn = DateTime.Now;
-            this.EventVersion = 1;
         }
 
         public override bool Equals(object other)
@@ -195,17 +192,14 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class ProductDescriptionChanged : IDomainEvent
+    public class ProductDescriptionChanged : DomainEvent
     {
         public string Description { get; private set; }
-        public DateTime OccurredOn { get; private set; }
-        public int EventVersion { get; private set; }
 
         public ProductDescriptionChanged(string description)
+            : base()
         {
             this.Description = description;
-            this.OccurredOn = DateTime.Now;
-            this.EventVersion = 1;
         }
 
         public override bool Equals(object other)
@@ -227,17 +221,14 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class ProductNameChanged : IDomainEvent
+    public class ProductNameChanged : DomainEvent
     {
         public string Name { get; private set; }
-        public DateTime OccurredOn { get; private set; }
-        public int EventVersion { get; private set; }
 
         public ProductNameChanged(string name)
+            : base()
         {
             this.Name = name;
-            this.OccurredOn = DateTime.Now;
-            this.EventVersion = 1;
         }
 
         public override bool Equals(object other)
@@ -259,17 +250,14 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class ProductPriceChanged : IDomainEvent
+    public class ProductPriceChanged : DomainEvent
     {
         public long Price { get; private set; }
-        public DateTime OccurredOn { get; private set; }
-        public int EventVersion { get; private set; }
 
         public ProductPriceChanged(long price)
+            : base()
         {
             this.Price = price;
-            this.OccurredOn = DateTime.Now;
-            this.EventVersion = 1;
         }
 
         public override bool Equals(object other)
