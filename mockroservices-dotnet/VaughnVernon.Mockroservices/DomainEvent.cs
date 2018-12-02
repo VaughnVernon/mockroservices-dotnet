@@ -14,10 +14,11 @@
 
 using System;
 using System.Collections.Generic;
+using VaughnVernon.Mockroservices.VaughnVernon.Mockroservices;
 
 namespace VaughnVernon.Mockroservices
 {
-    public abstract class DomainEvent
+    public abstract class DomainEvent : ISourceType
     {
 		public long OccurredOn { get; private set; }
 		public int EventVersion { get; private set; }

@@ -460,27 +460,27 @@ namespace VaughnVernon.Mockroservices
 
 	public abstract class EventSourceRepository
 	{
-		protected EventBatch ToBatch(List<DomainEvent> domainEvents)
+		protected EventBatch ToBatch<T>(List<T> sources)
 		{
-			EventBatch batch = new EventBatch(domainEvents.Count);
-			foreach (DomainEvent domainEvent in domainEvents)
+			EventBatch batch = new EventBatch(sources.Count);
+			foreach (T source in sources)
 			{
-				string eventBody = Serialization.Serialize(domainEvent);
-				batch.AddEntry(domainEvent.GetType().AssemblyQualifiedName, eventBody);
+				string eventBody = Serialization.Serialize(source);
+				batch.AddEntry(source.GetType().AssemblyQualifiedName, eventBody);
 			}
 			return batch;
 		}
 
-		protected List<DomainEvent> ToEvents(List<EventValue> stream)
+        protected List<T> ToSourceStream<T>(List<EventValue> stream)
 		{
-			List<DomainEvent> eventStream = new List<DomainEvent>(stream.Count);
+            List<T> sourceStream = new List<T>(stream.Count);
 			foreach (EventValue value in stream)
 			{
                 Type eventType = Type.GetType(value.Type);
-				DomainEvent domainEvent = (DomainEvent)Serialization.Deserialize(value.Body, eventType);
-				eventStream.Add(domainEvent);
+				T source = (T)Serialization.Deserialize(value.Body, eventType);
+				sourceStream.Add(source);
 			}
-			return eventStream;
+			return sourceStream;
 		}
 	}
 }

@@ -1,4 +1,4 @@
-//   Copyright © 2017 Vaughn Vernon. All rights reserved.
+﻿//   Copyright © 2017 Vaughn Vernon. All rights reserved.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ namespace VaughnVernon.Mockroservices.Tests
         {
             EventStream stream = reader.StreamFor(id);
 
-            return new PersonES(ToEvents(stream.Stream), stream.StreamVersion);
+            return new PersonES(ToSourceStream<DomainEvent>(stream.Stream), stream.StreamVersion);
         }
 
         public void Save(PersonES person)

@@ -14,10 +14,11 @@
 
 using System;
 using System.Collections.Generic;
+using VaughnVernon.Mockroservices.VaughnVernon.Mockroservices;
 
 namespace VaughnVernon.Mockroservices
 {
-    public abstract class Command
+    public abstract class Command : ISourceType
     {
 		public long OccurredOn { get; private set; }
 		public int CommandVersion { get; private set; }
