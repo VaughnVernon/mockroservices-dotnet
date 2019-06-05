@@ -78,6 +78,11 @@ namespace VaughnVernon.Mockroservices
             this.Type = type;
             this.Payload = payload;
         }
+
+        public string SimpleTypeName()
+        {
+            return Type.Split(',')[0];
+        }
     }
 
     public interface ISubscriber

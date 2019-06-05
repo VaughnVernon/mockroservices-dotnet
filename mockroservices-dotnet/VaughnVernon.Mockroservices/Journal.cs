@@ -18,23 +18,23 @@ using System.Threading;
 
 namespace VaughnVernon.Mockroservices
 {
-    public class EventJournal
+    public class Journal
     {
-        private static Dictionary<string, EventJournal> eventJournals = new Dictionary<string, EventJournal>();
+        private static Dictionary<string, Journal> journals = new Dictionary<string, Journal>();
 
-        private Dictionary<string, EventJournalReader> readers;
-        private List<EventValue> store;
+        private Dictionary<string, JournalReader> readers;
+        private List<EntryValue> store;
 
-        public static EventJournal Open(string name)
+        public static Journal Open(string name)
         {
-            if (eventJournals.ContainsKey(name))
+            if (journals.ContainsKey(name))
             {
-                return eventJournals[name];
+                return journals[name];
             }
 
-            EventJournal eventJournal = new EventJournal(name);
+            Journal eventJournal = new Journal(name);
 
-            eventJournals.Add(name, eventJournal);
+            journals.Add(name, eventJournal);
 
             return eventJournal;
         }
@@ -43,60 +43,60 @@ namespace VaughnVernon.Mockroservices
         {
             store.Clear();
             readers.Clear();
-            eventJournals.Remove(Name);
+            journals.Remove(Name);
         }
 
         public string Name { get; private set; }
 
-        public EventJournalReader Reader(string name)
+        public JournalReader Reader(string name)
         {
             if (readers.ContainsKey(name))
             {
                 return readers[name];
             }
 
-            EventJournalReader reader = new EventJournalReader(name, this);
+            JournalReader reader = new JournalReader(name, this);
 
             readers.Add(name, reader);
 
             return reader;
         }
 
-        public EventStreamReader StreamReader()
+        public EntryStreamReader StreamReader()
         {
-            return new EventStreamReader(this);
+            return new EntryStreamReader(this);
         }
 
-        public void Write(EventBatch batch)
+        public void Write(EntryBatch batch)
         {
             lock (store)
             {
-				foreach (EventBatch.Entry entry in batch.Entries)
+				foreach (EntryBatch.Entry entry in batch.Entries)
 				{
-					store.Add(new EventValue("", 0, entry.Type, entry.Body, ""));
+					store.Add(new EntryValue("", 0, entry.Type, entry.Body, ""));
 				}
 			}
 		}
 
-        public void Write(string streamName, int streamVersion, EventBatch batch)
+        public void Write(string streamName, int streamVersion, EntryBatch batch)
         {
             lock (store)
             {
-				foreach (EventBatch.Entry entry in batch.Entries)
+				foreach (EntryBatch.Entry entry in batch.Entries)
 				{
-					store.Add(new EventValue(streamName, streamVersion, entry.Type, entry.Body, entry.Snapshot));
+					store.Add(new EntryValue(streamName, streamVersion, entry.Type, entry.Body, entry.Snapshot));
 				}
 			}
 		}
 
-        protected EventJournal(string name)
+        protected Journal(string name)
         {
             this.Name = name;
-            this.readers = new Dictionary<string, EventJournalReader>();
-            this.store = new List<EventValue>();
+            this.readers = new Dictionary<string, JournalReader>();
+            this.store = new List<EntryValue>();
         }
 
-        internal EventValue EventValueAt(int id)
+        internal EntryValue EntryValueAt(int id)
         {
             lock (store)
             {
@@ -111,15 +111,15 @@ namespace VaughnVernon.Mockroservices
 
         internal int GreatestId { get { return store.Count - 1; } }
 
-        internal EventStream ReadStream(string streamName)
+        internal EntryStream ReadStream(string streamName)
         {
             lock (store)
             {
-                List<EventValue> values = new List<EventValue>();
-                List<EventValue> storeCopy = new List<EventValue>(store);
-                EventValue latestSnapshotValue = null;
+                List<EntryValue> values = new List<EntryValue>();
+                List<EntryValue> storeCopy = new List<EntryValue>(store);
+                EntryValue latestSnapshotValue = null;
 
-                foreach (EventValue value in storeCopy)
+                foreach (EntryValue value in storeCopy)
                 {
                     if (value.StreamName.Equals(streamName))
                     {
@@ -138,24 +138,24 @@ namespace VaughnVernon.Mockroservices
                 int snapshotVersion = latestSnapshotValue == null ? 0 : latestSnapshotValue.StreamVersion;
                 int streamVersion = values.Count == 0 ? snapshotVersion : values[values.Count - 1].StreamVersion;
 
-                return new EventStream(streamName, streamVersion, values, latestSnapshotValue == null ? "" : latestSnapshotValue.Snapshot);
+                return new EntryStream(streamName, streamVersion, values, latestSnapshotValue == null ? "" : latestSnapshotValue.Snapshot);
             }
         }
     }
 
-    public class EventJournalPublisher
+    public class JournalPublisher
     {
         private volatile bool closed;
         private Thread dispatcherThread;
-        private EventJournalReader reader;
+        private JournalReader reader;
         private Topic topic;
 
-        public static EventJournalPublisher From(
-            string eventJournalName,
+        public static JournalPublisher From(
+            string journalName,
             string messageBusName,
             string topicName)
         {
-            return new EventJournalPublisher(eventJournalName, messageBusName, topicName);
+            return new JournalPublisher(journalName, messageBusName, topicName);
         }
 
         public void Close()
@@ -163,12 +163,12 @@ namespace VaughnVernon.Mockroservices
             closed = true;
         }
 
-        protected EventJournalPublisher(
-            string eventJournalName,
+        protected JournalPublisher(
+            string journalName,
             string messageBusName,
             string topicName)
         {
-            this.reader = EventJournal.Open(eventJournalName).Reader("topic-" + topicName + "-reader");
+            this.reader = Journal.Open(journalName).Reader("topic-" + topicName + "-reader");
             this.topic = MessageBus.Start(messageBusName).OpenTopic(topicName);
             this.dispatcherThread = new Thread(new ThreadStart(this.DispatchEach));
 
@@ -179,19 +179,19 @@ namespace VaughnVernon.Mockroservices
         {
             while (!closed)
             {
-                StoredEvent storedEvent = reader.ReadNext();
+                StoredSource storedSource = reader.ReadNext();
 
-                if (storedEvent.IsValid())
+                if (storedSource.IsValid())
                 {
                     Message message =
                         new Message(
-                            Convert.ToString(storedEvent.Id),
-                            storedEvent.EventValue.Type,
-                            storedEvent.EventValue.Body);
+                            Convert.ToString(storedSource.Id),
+                            storedSource.EntryValue.Type,
+                            storedSource.EntryValue.Body);
 
                     topic.Publish(message);
 
-                    reader.Acknowledge(storedEvent.Id);
+                    reader.Acknowledge(storedSource.Id);
 
                 }
                 else
@@ -212,9 +212,9 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class EventJournalReader
+    public class JournalReader
     {
-        private EventJournal eventJournal;
+        private Journal journal;
         private int readSequence;
 
         public void Acknowledge(long id)
@@ -235,14 +235,14 @@ namespace VaughnVernon.Mockroservices
 
         public string Name { get; private set; }
 
-        public StoredEvent ReadNext()
+        public StoredSource ReadNext()
         {
-            if (readSequence <= eventJournal.GreatestId)
+            if (readSequence <= journal.GreatestId)
             {
-                return new StoredEvent(readSequence, eventJournal.EventValueAt(readSequence));
+                return new StoredSource(readSequence, journal.EntryValueAt(readSequence));
             }
 
-            return new StoredEvent(StoredEvent.NO_ID, new EventValue("", EventValue.NO_STREAM_VERSION, "", "", ""));
+            return new StoredSource(StoredSource.NO_ID, new EntryValue("", EntryValue.NO_STREAM_VERSION, "", "", ""));
         }
 
         public void Reset()
@@ -250,18 +250,18 @@ namespace VaughnVernon.Mockroservices
             readSequence = 0;
         }
 
-        internal EventJournalReader(string name, EventJournal eventJournal)
+        internal JournalReader(string name, Journal eventJournal)
         {
             this.Name = name;
-            this.eventJournal = eventJournal;
+            this.journal = eventJournal;
             this.readSequence = 0;
         }
     }
 
-    public class EventStream
+    public class EntryStream
     {
         public string Snapshot { get; private set; }
-        public List<EventValue> Stream { get; private set; }
+        public List<EntryValue> Stream { get; private set; }
         public string StreamName { get; private set; }
         public int StreamVersion { get; private set; }
 
@@ -270,7 +270,7 @@ namespace VaughnVernon.Mockroservices
             return Snapshot.Length > 0;
         }
 
-        internal EventStream(string streamName, int streamVersion, List<EventValue> stream, string snapshot)
+        internal EntryStream(string streamName, int streamVersion, List<EntryValue> stream, string snapshot)
         {
             this.StreamName = streamName;
             this.StreamVersion = streamVersion;
@@ -279,22 +279,22 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class EventStreamReader
+    public class EntryStreamReader
     {
-        private EventJournal eventJournal;
+        private Journal journal;
 
-        public EventStream StreamFor(string streamName)
+        public EntryStream StreamFor(string streamName)
         {
-            return eventJournal.ReadStream(streamName);
+            return journal.ReadStream(streamName);
         }
 
-        internal EventStreamReader(EventJournal eventJournal)
+        internal EntryStreamReader(Journal journal)
         {
-            this.eventJournal = eventJournal;
+            this.journal = journal;
         }
     }
 
-    public class EventValue
+    public class EntryValue
     {
         public static int NO_STREAM_VERSION = -1;
 
@@ -316,27 +316,27 @@ namespace VaughnVernon.Mockroservices
 
         public override bool Equals(object other)
         {
-            if (other == null || other.GetType() != typeof(EventValue))
+            if (other == null || other.GetType() != typeof(EntryValue))
             {
                 return false;
             }
 
-            EventValue otherEventValue = (EventValue)other;
+            EntryValue otherEntryValue = (EntryValue)other;
 
-            return this.StreamName.Equals(otherEventValue.StreamName) &&
-                this.StreamVersion == otherEventValue.StreamVersion &&
-                this.Type.Equals(otherEventValue.Type) &&
-                this.Body.Equals(otherEventValue.Body) &&
-                this.Snapshot.Equals(otherEventValue.Snapshot);
+            return this.StreamName.Equals(otherEntryValue.StreamName) &&
+                this.StreamVersion == otherEntryValue.StreamVersion &&
+                this.Type.Equals(otherEntryValue.Type) &&
+                this.Body.Equals(otherEntryValue.Body) &&
+                this.Snapshot.Equals(otherEntryValue.Snapshot);
         }
 
         public override string ToString()
         {
-            return "EventValue[streamName=" + StreamName + " StreamVersion=" + StreamVersion +
+            return "EntryValue[streamName=" + StreamName + " StreamVersion=" + StreamVersion +
                 " type=" + Type + " body=" + Body + " snapshot=" + Snapshot + "]";
         }
 
-        internal EventValue(
+        internal EntryValue(
             string streamName,
             int streamVersion,
             string type,
@@ -352,11 +352,11 @@ namespace VaughnVernon.Mockroservices
         }
     }
 
-    public class StoredEvent
+    public class StoredSource
     {
         public static long NO_ID = -1L;
 
-        public EventValue EventValue { get; private set; }
+        public EntryValue EntryValue { get; private set; }
         public long Id { get; private set; }
 
         public bool IsValid()
@@ -366,63 +366,63 @@ namespace VaughnVernon.Mockroservices
 
         public override int GetHashCode()
         {
-            return EventValue.GetHashCode() + (int)Id;
+            return EntryValue.GetHashCode() + (int)Id;
         }
 
         public override bool Equals(object other)
         {
-            if (other == null || other.GetType() != typeof(StoredEvent))
+            if (other == null || other.GetType() != typeof(StoredSource))
             {
                 return false;
             }
 
-            StoredEvent otherStoredEvent = (StoredEvent)other;
+            StoredSource otherStoredSource = (StoredSource)other;
 
-            return this.Id == otherStoredEvent.Id && this.EventValue.Equals(otherStoredEvent.EventValue);
+            return this.Id == otherStoredSource.Id && this.EntryValue.Equals(otherStoredSource.EntryValue);
         }
 
         public override string ToString()
         {
-            return "StoredEvent[id=" + Id + " eventValue=" + EventValue + "]";
+            return "StoredSource[id=" + Id + " entryValue=" + EntryValue + "]";
         }
 
-        internal StoredEvent(long id, EventValue eventValue)
+        internal StoredSource(long id, EntryValue eventValue)
         {
             this.Id = id;
-            this.EventValue = eventValue;
+            this.EntryValue = eventValue;
         }
     }
 
-	public class EventBatch
+	public class EntryBatch
 	{
 		public List<Entry> Entries { get; private set; }
 
-		public static EventBatch Of(string type, string body)
+		public static EntryBatch Of(string type, string body)
 		{
-			return new EventBatch(type, body);
+			return new EntryBatch(type, body);
 		}
 
-		public static EventBatch Of(string type, string body, string snapshot)
+		public static EntryBatch Of(string type, string body, string snapshot)
 		{
-			return new EventBatch(type, body, snapshot);
+			return new EntryBatch(type, body, snapshot);
 		}
 
-		public EventBatch()
+		public EntryBatch()
 			: this(2)
 		{
 		}
 
-		public EventBatch(int entries)
+		public EntryBatch(int entries)
 		{
 			this.Entries = new List<Entry>(entries);
 		}
 
-		public EventBatch(string type, string body)
+		public EntryBatch(string type, string body)
 			: this(type, body, "")
 		{
 		}
 
-		public EventBatch(string type, string body, string snapshot)
+		public EntryBatch(string type, string body, string snapshot)
 			: this()
 		{
 			this.AddEntry(type, body, snapshot);
@@ -455,32 +455,6 @@ namespace VaughnVernon.Mockroservices
 				this.Body = body;
 				this.Snapshot = snapshot;
 			}
-		}
-	}
-
-	public abstract class EventSourceRepository
-	{
-		protected EventBatch ToBatch<T>(List<T> sources)
-		{
-			EventBatch batch = new EventBatch(sources.Count);
-			foreach (T source in sources)
-			{
-				string eventBody = Serialization.Serialize(source);
-				batch.AddEntry(source.GetType().AssemblyQualifiedName, eventBody);
-			}
-			return batch;
-		}
-
-        protected List<T> ToSourceStream<T>(List<EventValue> stream)
-		{
-            List<T> sourceStream = new List<T>(stream.Count);
-			foreach (EventValue value in stream)
-			{
-                Type eventType = Type.GetType(value.Type);
-				T source = (T)Serialization.Deserialize(value.Body, eventType);
-				sourceStream.Add(source);
-			}
-			return sourceStream;
 		}
 	}
 }
