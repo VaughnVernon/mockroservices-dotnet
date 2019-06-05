@@ -14,6 +14,7 @@
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using VaughnVernon.Mockroservices.VaughnVernon.Mockroservices;
 
 namespace VaughnVernon.Mockroservices.Tests
 {
@@ -33,14 +34,14 @@ namespace VaughnVernon.Mockroservices.Tests
         }
     }
 
-    public class PersonRepository : EventSourceRepository
+    public class PersonRepository : Repository
     {
-        private EventJournal journal;
-        private EventStreamReader reader;
+        private Journal journal;
+        private EntryStreamReader reader;
 
         public PersonES PersonOfId(string id)
         {
-            EventStream stream = reader.StreamFor(id);
+            EntryStream stream = reader.StreamFor(id);
 
             return new PersonES(ToSourceStream<DomainEvent>(stream.Stream), stream.StreamVersion);
         }
@@ -52,7 +53,7 @@ namespace VaughnVernon.Mockroservices.Tests
 
         internal PersonRepository()
         {
-            this.journal = EventJournal.Open("repo-test");
+            this.journal = Journal.Open("repo-test");
             this.reader = this.journal.StreamReader();
         }
     }

@@ -22,12 +22,12 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestEventJournalOpenClose()
         {
-            EventJournal journal = EventJournal.Open("test");
+            Journal journal = Journal.Open("test");
 
             Assert.IsNotNull(journal);
             Assert.AreEqual("test", journal.Name);
 
-            EventJournal journalPreOpened = EventJournal.Open("test");
+            Journal journalPreOpened = Journal.Open("test");
             Assert.AreSame(journal, journalPreOpened);
 
             journal.Close();
@@ -36,11 +36,11 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestOpenEventJournalReader()
         {
-            EventJournal journal = EventJournal.Open("test");
-            EventJournalReader reader = journal.Reader("test_reader");
+            Journal journal = Journal.Open("test");
+            JournalReader reader = journal.Reader("test_reader");
             Assert.IsNotNull(reader);
             Assert.AreEqual("test_reader", reader.Name);
-            EventJournalReader readerPreOpened = journal.Reader("test_reader");
+            JournalReader readerPreOpened = journal.Reader("test_reader");
             Assert.AreSame(reader, readerPreOpened);
 
             journal.Close();
@@ -49,15 +49,15 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestWriteRead()
         {
-            EventJournal journal = EventJournal.Open("test");
-			journal.Write("name123", 1, EventBatch.Of("type1", "type1_instance1"));
-			journal.Write("name456", 1, EventBatch.Of("type2", "type2_instance1"));
-			EventJournalReader reader = journal.Reader("test_reader");
-            Assert.AreEqual(new StoredEvent(0, new EventValue("name123", 1, "type1", "type1_instance1", "")), reader.ReadNext());
+            Journal journal = Journal.Open("test");
+			journal.Write("name123", 1, EntryBatch.Of("type1", "type1_instance1"));
+			journal.Write("name456", 1, EntryBatch.Of("type2", "type2_instance1"));
+			JournalReader reader = journal.Reader("test_reader");
+            Assert.AreEqual(new StoredSource(0, new EntryValue("name123", 1, "type1", "type1_instance1", "")), reader.ReadNext());
             reader.Acknowledge(0);
-            Assert.AreEqual(new StoredEvent(1, new EventValue("name456", 1, "type2", "type2_instance1", "")), reader.ReadNext());
+            Assert.AreEqual(new StoredSource(1, new EntryValue("name456", 1, "type2", "type2_instance1", "")), reader.ReadNext());
             reader.Acknowledge(1);
-            Assert.AreEqual(new StoredEvent(-1, new EventValue("", -1, "", "", "")), reader.ReadNext());
+            Assert.AreEqual(new StoredSource(-1, new EntryValue("", -1, "", "", "")), reader.ReadNext());
 
             journal.Close();
         }
@@ -65,27 +65,27 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestWriteReadStream()
         {
-			EventJournal journal = EventJournal.Open("test");
-			journal.Write("name123", 1, EventBatch.Of("type1", "type1_instance1"));
-			journal.Write("name456", 1, EventBatch.Of("type2", "type2_instance1"));
-			journal.Write("name123", 2, EventBatch.Of("type1-1", "type1-1_instance1"));
-			journal.Write("name123", 3, EventBatch.Of("type1-2", "type1-2_instance1"));
-			journal.Write("name456", 2, EventBatch.Of("type2-1", "type2-1_instance1"));
+			Journal journal = Journal.Open("test");
+			journal.Write("name123", 1, EntryBatch.Of("type1", "type1_instance1"));
+			journal.Write("name456", 1, EntryBatch.Of("type2", "type2_instance1"));
+			journal.Write("name123", 2, EntryBatch.Of("type1-1", "type1-1_instance1"));
+			journal.Write("name123", 3, EntryBatch.Of("type1-2", "type1-2_instance1"));
+			journal.Write("name456", 2, EntryBatch.Of("type2-1", "type2-1_instance1"));
 
-			EventStreamReader streamReader = journal.StreamReader();
+			EntryStreamReader streamReader = journal.StreamReader();
 
-            EventStream eventStream123 = streamReader.StreamFor("name123");
+            EntryStream eventStream123 = streamReader.StreamFor("name123");
             Assert.AreEqual(3, eventStream123.StreamVersion);
             Assert.AreEqual(3, eventStream123.Stream.Count);
-            Assert.AreEqual(new EventValue("name123", 1, "type1", "type1_instance1", ""), eventStream123.Stream[0]);
-            Assert.AreEqual(new EventValue("name123", 2, "type1-1", "type1-1_instance1", ""), eventStream123.Stream[1]);
-            Assert.AreEqual(new EventValue("name123", 3, "type1-2", "type1-2_instance1", ""), eventStream123.Stream[2]);
+            Assert.AreEqual(new EntryValue("name123", 1, "type1", "type1_instance1", ""), eventStream123.Stream[0]);
+            Assert.AreEqual(new EntryValue("name123", 2, "type1-1", "type1-1_instance1", ""), eventStream123.Stream[1]);
+            Assert.AreEqual(new EntryValue("name123", 3, "type1-2", "type1-2_instance1", ""), eventStream123.Stream[2]);
 
-            EventStream eventStream456 = streamReader.StreamFor("name456");
+            EntryStream eventStream456 = streamReader.StreamFor("name456");
             Assert.AreEqual(2, eventStream456.StreamVersion);
             Assert.AreEqual(2, eventStream456.Stream.Count);
-            Assert.AreEqual(new EventValue("name456", 1, "type2", "type2_instance1", ""), eventStream456.Stream[0]);
-            Assert.AreEqual(new EventValue("name456", 2, "type2-1", "type2-1_instance1", ""), eventStream456.Stream[1]);
+            Assert.AreEqual(new EntryValue("name456", 1, "type2", "type2_instance1", ""), eventStream456.Stream[0]);
+            Assert.AreEqual(new EntryValue("name456", 2, "type2-1", "type2-1_instance1", ""), eventStream456.Stream[1]);
 
             journal.Close();
         }
@@ -93,22 +93,22 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestWriteReadStreamSnapshot()
         {
-            EventJournal journal = EventJournal.Open("test");
-			journal.Write("name123", 1, EventBatch.Of("type1", "type1_instance1", "SNAPSHOT123-1"));
-			journal.Write("name456", 1, EventBatch.Of("type2", "type2_instance1", "SNAPSHOT456-1"));
-			journal.Write("name123", 2, EventBatch.Of("type1-1", "type1-1_instance1", "SNAPSHOT123-2"));
-			journal.Write("name123", 3, EventBatch.Of("type1-2", "type1-2_instance1"));
-			journal.Write("name456", 2, EventBatch.Of("type2-1", "type2-1_instance1", "SNAPSHOT456-2"));
+            Journal journal = Journal.Open("test");
+			journal.Write("name123", 1, EntryBatch.Of("type1", "type1_instance1", "SNAPSHOT123-1"));
+			journal.Write("name456", 1, EntryBatch.Of("type2", "type2_instance1", "SNAPSHOT456-1"));
+			journal.Write("name123", 2, EntryBatch.Of("type1-1", "type1-1_instance1", "SNAPSHOT123-2"));
+			journal.Write("name123", 3, EntryBatch.Of("type1-2", "type1-2_instance1"));
+			journal.Write("name456", 2, EntryBatch.Of("type2-1", "type2-1_instance1", "SNAPSHOT456-2"));
 
-			EventStreamReader streamReader = journal.StreamReader();
+			EntryStreamReader streamReader = journal.StreamReader();
 
-            EventStream eventStream123 = streamReader.StreamFor("name123");
+            EntryStream eventStream123 = streamReader.StreamFor("name123");
             Assert.AreEqual("name123", eventStream123.StreamName);
             Assert.AreEqual(3, eventStream123.StreamVersion);
             Assert.AreEqual(1, eventStream123.Stream.Count);
             Assert.AreEqual("SNAPSHOT123-2", eventStream123.Snapshot);
 
-            EventStream eventStream456 = streamReader.StreamFor("name456");
+            EntryStream eventStream456 = streamReader.StreamFor("name456");
             Assert.AreEqual("name456", eventStream456.StreamName);
             Assert.AreEqual(2, eventStream456.StreamVersion);
             Assert.AreEqual(0, eventStream456.Stream.Count);

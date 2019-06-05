@@ -24,23 +24,23 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestEventJournalPublisher()
         {
-            EventJournal eventJournal = EventJournal.Open("test-ej");
+            Journal eventJournal = Journal.Open("test-ej");
             MessageBus messageBus = MessageBus.Start("test-bus");
             Topic topic = messageBus.OpenTopic("test-topic");
-            EventJournalPublisher journalPublisher =
-                EventJournalPublisher.From(eventJournal.Name, messageBus.Name, topic.Name);
+            JournalPublisher journalPublisher =
+                JournalPublisher.From(eventJournal.Name, messageBus.Name, topic.Name);
 
-            EventJournalPublisherTestSubscriber subscriber = new EventJournalPublisherTestSubscriber();
+            JournalPublisherTestSubscriber subscriber = new JournalPublisherTestSubscriber();
             topic.Subscribe(subscriber);
 
-			EventBatch batch1 = new EventBatch();
+			EntryBatch batch1 = new EntryBatch();
 			for (int idx = 0; idx < 3; ++idx)
             {
 				batch1.AddEntry("test1type", "test1instance" + idx);
             }
 			eventJournal.Write("test1", 0, batch1);
 
-			EventBatch batch2 = new EventBatch();
+			EntryBatch batch2 = new EntryBatch();
 			for (int idx = 0; idx < 3; ++idx)
             {
 				batch2.AddEntry("test2type", "test2instance" + idx);
@@ -57,7 +57,7 @@ namespace VaughnVernon.Mockroservices.Tests
         }
     }
 
-    internal class EventJournalPublisherTestSubscriber : ISubscriber
+    internal class JournalPublisherTestSubscriber : ISubscriber
     {
         internal List<Message> handledMessages = new List<Message>();
 
