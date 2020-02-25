@@ -24,12 +24,36 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestSaveFind()
         {
-            PersonRepository repository = new PersonRepository();
-            PersonES person = new PersonES("Joe", 40, DateTime.Now);
+            var repository = new PersonRepository();
+            var person = new PersonES("Joe", 40, DateTime.Now);
             repository.Save(person);
-            PersonES joe = repository.PersonOfId(person.Id);
-            Console.WriteLine("PERSON: " + person);
-            Console.WriteLine("JOE: " + joe);
+            var joe = repository.PersonOfId(person.Id);
+            Console.WriteLine($"PERSON: {person}");
+            Console.WriteLine($"JOE: {joe}");
+            Assert.AreEqual(person, joe);
+        }
+        
+        [TestMethod]
+        public void TestSaveWithStreamPrefixAndFind()
+        {
+            var repository = new PersonRepository();
+            var person = new PersonES("Joe", 40, DateTime.Now);
+            repository.Save<PersonES>(person);
+            var joe = repository.PersonOfId(StreamNameBuilder.BuildStreamNameFor<PersonES>(person.Id));
+            Console.WriteLine($"PERSON: {person}");
+            Console.WriteLine($"JOE: {joe}");
+            Assert.AreEqual(person, joe);
+        }
+        
+        [TestMethod]
+        public void TestSaveFindWithStreamPrefix()
+        {
+            var repository = new PersonRepository();
+            var person = new PersonES("Joe", 40, DateTime.Now);
+            repository.Save<PersonES>(person);
+            var joe = repository.PersonOfId<PersonES>(person.Id);
+            Console.WriteLine($"PERSON: {person}");
+            Console.WriteLine($"JOE: {joe}");
             Assert.AreEqual(person, joe);
         }
     }
@@ -41,7 +65,14 @@ namespace VaughnVernon.Mockroservices.Tests
 
         public PersonES PersonOfId(string id)
         {
-            EntryStream stream = reader.StreamFor(id);
+            var stream = reader.StreamFor(id);
+
+            return new PersonES(ToSourceStream<DomainEvent>(stream.Stream), stream.StreamVersion);
+        }
+        
+        public PersonES PersonOfId<T>(string id)
+        {
+            var stream = reader.StreamFor<T>(id);
 
             return new PersonES(ToSourceStream<DomainEvent>(stream.Stream), stream.StreamVersion);
         }
@@ -50,11 +81,16 @@ namespace VaughnVernon.Mockroservices.Tests
         {
             journal.Write(person.Id, person.NextVersion, ToBatch(person.Applied));
         }
+        
+        public void Save<T>(T person) where T : PersonES
+        {
+            journal.Write<T>(person.Id, person.NextVersion, ToBatch(person.Applied));
+        }
 
         internal PersonRepository()
         {
-            this.journal = Journal.Open("repo-test");
-            this.reader = this.journal.StreamReader();
+            journal = Journal.Open("repo-test");
+            reader = journal.StreamReader();
         }
     }
 }

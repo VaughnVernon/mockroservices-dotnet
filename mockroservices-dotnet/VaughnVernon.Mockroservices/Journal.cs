@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using VaughnVernon.Mockroservices.VaughnVernon.Mockroservices;
 
 namespace VaughnVernon.Mockroservices
 {
@@ -32,7 +33,7 @@ namespace VaughnVernon.Mockroservices
                 return journals[name];
             }
 
-            Journal eventJournal = new Journal(name);
+            var eventJournal = new Journal(name);
 
             journals.Add(name, eventJournal);
 
@@ -55,7 +56,7 @@ namespace VaughnVernon.Mockroservices
                 return readers[name];
             }
 
-            JournalReader reader = new JournalReader(name, this);
+            var reader = new JournalReader(name, this);
 
             readers.Add(name, reader);
 
@@ -71,18 +72,29 @@ namespace VaughnVernon.Mockroservices
         {
             lock (store)
             {
-				foreach (EntryBatch.Entry entry in batch.Entries)
+				foreach (var entry in batch.Entries)
 				{
 					store.Add(new EntryValue("", 0, entry.Type, entry.Body, ""));
 				}
 			}
 		}
 
+        public void Write<T>(string streamName, int streamVersion, EntryBatch batch)
+        {
+            lock (store)
+            {
+                foreach (var entry in batch.Entries)
+                {
+                    store.Add(new EntryValue(StreamNameBuilder.BuildStreamNameFor<T>(streamName), streamVersion, entry.Type, entry.Body, entry.Snapshot));
+                }
+            }
+        }
+        
         public void Write(string streamName, int streamVersion, EntryBatch batch)
         {
             lock (store)
             {
-				foreach (EntryBatch.Entry entry in batch.Entries)
+				foreach (var entry in batch.Entries)
 				{
 					store.Add(new EntryValue(streamName, streamVersion, entry.Type, entry.Body, entry.Snapshot));
 				}
@@ -91,9 +103,9 @@ namespace VaughnVernon.Mockroservices
 
         protected Journal(string name)
         {
-            this.Name = name;
-            this.readers = new Dictionary<string, JournalReader>();
-            this.store = new List<EntryValue>();
+            Name = name;
+            readers = new Dictionary<string, JournalReader>();
+            store = new List<EntryValue>();
         }
 
         internal EntryValue EntryValueAt(int id)
@@ -102,7 +114,7 @@ namespace VaughnVernon.Mockroservices
             {
                 if (id >= store.Count)
                 {
-                    throw new InvalidOperationException("The id does not exist: " + id);
+                    throw new InvalidOperationException($"The id does not exist: {id}");
                 }
 
                 return store[id];
@@ -115,11 +127,11 @@ namespace VaughnVernon.Mockroservices
         {
             lock (store)
             {
-                List<EntryValue> values = new List<EntryValue>();
-                List<EntryValue> storeCopy = new List<EntryValue>(store);
+                var values = new List<EntryValue>();
+                var storeCopy = new List<EntryValue>(store);
                 EntryValue latestSnapshotValue = null;
 
-                foreach (EntryValue value in storeCopy)
+                foreach (var value in storeCopy)
                 {
                     if (value.StreamName.Equals(streamName))
                     {
@@ -135,8 +147,8 @@ namespace VaughnVernon.Mockroservices
                     }
                 }
 
-                int snapshotVersion = latestSnapshotValue == null ? 0 : latestSnapshotValue.StreamVersion;
-                int streamVersion = values.Count == 0 ? snapshotVersion : values[values.Count - 1].StreamVersion;
+                var snapshotVersion = latestSnapshotValue == null ? 0 : latestSnapshotValue.StreamVersion;
+                var streamVersion = values.Count == 0 ? snapshotVersion : values[values.Count - 1].StreamVersion;
 
                 return new EntryStream(streamName, streamVersion, values, latestSnapshotValue == null ? "" : latestSnapshotValue.Snapshot);
             }
@@ -168,9 +180,9 @@ namespace VaughnVernon.Mockroservices
             string messageBusName,
             string topicName)
         {
-            this.reader = Journal.Open(journalName).Reader("topic-" + topicName + "-reader");
-            this.topic = MessageBus.Start(messageBusName).OpenTopic(topicName);
-            this.dispatcherThread = new Thread(new ThreadStart(this.DispatchEach));
+            reader = Journal.Open(journalName).Reader($"topic-{topicName}-reader");
+            topic = MessageBus.Start(messageBusName).OpenTopic(topicName);
+            dispatcherThread = new Thread(DispatchEach);
 
             StartDispatcherThread();
         }
@@ -179,11 +191,11 @@ namespace VaughnVernon.Mockroservices
         {
             while (!closed)
             {
-                StoredSource storedSource = reader.ReadNext();
+                var storedSource = reader.ReadNext();
 
                 if (storedSource.IsValid())
                 {
-                    Message message =
+                    var message =
                         new Message(
                             Convert.ToString(storedSource.Id),
                             storedSource.EntryValue.Type,
@@ -252,9 +264,9 @@ namespace VaughnVernon.Mockroservices
 
         internal JournalReader(string name, Journal eventJournal)
         {
-            this.Name = name;
-            this.journal = eventJournal;
-            this.readSequence = 0;
+            Name = name;
+            journal = eventJournal;
+            readSequence = 0;
         }
     }
 
@@ -272,10 +284,10 @@ namespace VaughnVernon.Mockroservices
 
         internal EntryStream(string streamName, int streamVersion, List<EntryValue> stream, string snapshot)
         {
-            this.StreamName = streamName;
-            this.StreamVersion = streamVersion;
-            this.Stream = stream;
-            this.Snapshot = snapshot;
+            StreamName = streamName;
+            StreamVersion = streamVersion;
+            Stream = stream;
+            Snapshot = snapshot;
         }
     }
 
@@ -286,6 +298,11 @@ namespace VaughnVernon.Mockroservices
         public EntryStream StreamFor(string streamName)
         {
             return journal.ReadStream(streamName);
+        }
+        
+        public EntryStream StreamFor<T>(string streamName)
+        {
+            return journal.ReadStream(StreamNameBuilder.BuildStreamNameFor<T>(streamName));
         }
 
         internal EntryStreamReader(Journal journal)
@@ -311,7 +328,7 @@ namespace VaughnVernon.Mockroservices
 
         public override int GetHashCode()
         {
-            return this.StreamName.GetHashCode() + this.StreamVersion;
+            return StreamName.GetHashCode() + StreamVersion;
         }
 
         public override bool Equals(object other)
@@ -321,19 +338,19 @@ namespace VaughnVernon.Mockroservices
                 return false;
             }
 
-            EntryValue otherEntryValue = (EntryValue)other;
+            var otherEntryValue = (EntryValue)other;
 
-            return this.StreamName.Equals(otherEntryValue.StreamName) &&
-                this.StreamVersion == otherEntryValue.StreamVersion &&
-                this.Type.Equals(otherEntryValue.Type) &&
-                this.Body.Equals(otherEntryValue.Body) &&
-                this.Snapshot.Equals(otherEntryValue.Snapshot);
+            return StreamName.Equals(otherEntryValue.StreamName) &&
+                StreamVersion == otherEntryValue.StreamVersion &&
+                Type.Equals(otherEntryValue.Type) &&
+                Body.Equals(otherEntryValue.Body) &&
+                Snapshot.Equals(otherEntryValue.Snapshot);
         }
 
         public override string ToString()
         {
-            return "EntryValue[streamName=" + StreamName + " StreamVersion=" + StreamVersion +
-                " type=" + Type + " body=" + Body + " snapshot=" + Snapshot + "]";
+            return
+                $"EntryValue[streamName={StreamName} StreamVersion={StreamVersion} type={Type} body={Body} snapshot={Snapshot}]";
         }
 
         internal EntryValue(
@@ -344,11 +361,11 @@ namespace VaughnVernon.Mockroservices
             string snapshot)
         {
 
-            this.StreamName = streamName;
-            this.StreamVersion = streamVersion;
-            this.Type = type;
-            this.Body = body;
-            this.Snapshot = snapshot;
+            StreamName = streamName;
+            StreamVersion = streamVersion;
+            Type = type;
+            Body = body;
+            Snapshot = snapshot;
         }
     }
 
@@ -376,20 +393,20 @@ namespace VaughnVernon.Mockroservices
                 return false;
             }
 
-            StoredSource otherStoredSource = (StoredSource)other;
+            var otherStoredSource = (StoredSource)other;
 
-            return this.Id == otherStoredSource.Id && this.EntryValue.Equals(otherStoredSource.EntryValue);
+            return Id == otherStoredSource.Id && EntryValue.Equals(otherStoredSource.EntryValue);
         }
 
         public override string ToString()
         {
-            return "StoredSource[id=" + Id + " entryValue=" + EntryValue + "]";
+            return $"StoredSource[id={Id} entryValue={EntryValue}]";
         }
 
         internal StoredSource(long id, EntryValue eventValue)
         {
-            this.Id = id;
-            this.EntryValue = eventValue;
+            Id = id;
+            EntryValue = eventValue;
         }
     }
 
@@ -414,7 +431,7 @@ namespace VaughnVernon.Mockroservices
 
 		public EntryBatch(int entries)
 		{
-			this.Entries = new List<Entry>(entries);
+			Entries = new List<Entry>(entries);
 		}
 
 		public EntryBatch(string type, string body)
@@ -425,17 +442,17 @@ namespace VaughnVernon.Mockroservices
 		public EntryBatch(string type, string body, string snapshot)
 			: this()
 		{
-			this.AddEntry(type, body, snapshot);
+			AddEntry(type, body, snapshot);
 		}
 
 		public void AddEntry(string type, string body)
 		{
-			this.Entries.Add(new Entry(type, body));
+			Entries.Add(new Entry(type, body));
 		}
 
 		public void AddEntry(string type, string body, string snapshot)
 		{
-			this.Entries.Add(new Entry(type, body, snapshot));
+			Entries.Add(new Entry(type, body, snapshot));
 		}
 
 		public class Entry
@@ -451,9 +468,9 @@ namespace VaughnVernon.Mockroservices
 
 			internal Entry(string type, string body, string snapshot)
 			{
-				this.Type = type;
-				this.Body = body;
-				this.Snapshot = snapshot;
+				Type = type;
+				Body = body;
+				Snapshot = snapshot;
 			}
 		}
 	}
