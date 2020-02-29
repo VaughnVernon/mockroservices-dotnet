@@ -21,10 +21,10 @@ namespace VaughnVernon.Mockroservices.VaughnVernon.Mockroservices
     {
         protected EntryBatch ToBatch<T>(List<T> sources)
         {
-            EntryBatch batch = new EntryBatch(sources.Count);
-            foreach (T source in sources)
+            var batch = new EntryBatch(sources.Count);
+            foreach (var source in sources)
             {
-                string eventBody = Serialization.Serialize(source);
+                var eventBody = Serialization.Serialize(source);
                 batch.AddEntry(source.GetType().AssemblyQualifiedName, eventBody);
             }
             return batch;
@@ -32,11 +32,11 @@ namespace VaughnVernon.Mockroservices.VaughnVernon.Mockroservices
 
         protected List<T> ToSourceStream<T>(List<EntryValue> stream)
         {
-            List<T> sourceStream = new List<T>(stream.Count);
-            foreach (EntryValue value in stream)
+            var sourceStream = new List<T>(stream.Count);
+            foreach (var value in stream)
             {
-                Type sourceType = Type.GetType(value.Type);
-                T source = (T)Serialization.Deserialize(value.Body, sourceType);
+                var sourceType = Type.GetType(value.Type);
+                var source = (T)Serialization.Deserialize(value.Body, sourceType);
                 sourceStream.Add(source);
             }
             return sourceStream;
