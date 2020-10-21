@@ -16,12 +16,12 @@ using System.Collections.Generic;
 
 namespace VaughnVernon.Mockroservices
 {
-    public abstract class SourcedEntity<Source>
+    public abstract class SourcedEntity<TSource>
     {
-        private readonly List<Source> applied;
+        private readonly List<TSource> applied;
         private readonly int currentVersion;
 
-        public List<Source> Applied
+        public List<TSource> Applied
         {
             get { return this.applied; }
         }
@@ -38,14 +38,14 @@ namespace VaughnVernon.Mockroservices
 
         protected SourcedEntity()
         {
-            this.applied = new List<Source>();
+            this.applied = new List<TSource>();
             this.currentVersion = 0;
         }
 
-        protected SourcedEntity(List<Source> stream, int streamVersion)
+        protected SourcedEntity(List<TSource> stream, int streamVersion)
             : this()
         {
-            foreach (Source source in stream)
+            foreach (TSource source in stream)
             {
                 DispatchWhen(source);
             }
@@ -53,13 +53,13 @@ namespace VaughnVernon.Mockroservices
             this.currentVersion = streamVersion;
         }
 
-        protected void Apply(Source source)
+        protected void Apply(TSource source)
         {
             applied.Add(source);
             DispatchWhen(source);
         }
 
-        protected void DispatchWhen(Source source)
+        protected void DispatchWhen(TSource source)
         {
             ((dynamic) this).When((dynamic)source);
         }

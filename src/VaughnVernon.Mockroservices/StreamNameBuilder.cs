@@ -1,4 +1,4 @@
-﻿//   Copyright © 2017 Vaughn Vernon. All rights reserved.
+//   Copyright © 2017 Vaughn Vernon. All rights reserved.
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -12,20 +12,10 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-using System;
-
 namespace VaughnVernon.Mockroservices
 {
-    public class TestableDomainEvent : DomainEvent
+    public static class StreamNameBuilder
     {
-        public long Id { get; private set; }
-        public string Name { get; private set; }
-
-        public TestableDomainEvent(long id, string name)
-            : base()
-        {
-            this.Id = id;
-            this.Name = name;
-        }
+        public static string BuildStreamNameFor<T>(string value) => $"{typeof(T).Name}_{value}";
     }
 }

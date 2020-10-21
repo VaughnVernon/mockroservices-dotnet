@@ -14,7 +14,7 @@
 
 using System.Collections.Generic;
 
-namespace VaughnVernon.Mockroservices.VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices
 {
     public abstract class ProcessManager : SourcedEntity<Command>
     {

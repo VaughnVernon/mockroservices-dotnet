@@ -1,20 +1,16 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{65B69F5B-F805-445F-8807-A643B3B3E3CE}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\packages.config = .nuget\packages.config
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF54FF2F-CFFF-4334-8469-6B1DE560FDFA}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mockroservices", "mockroservices-dotnet\Mockroservices.csproj", "{13749012-6F4A-4D48-9A85-4AA41C42F355}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "src", "VaughnVernon.Mockroservices\VaughnVernon.Mockroservices.csproj", "{13749012-6F4A-4D48-9A85-4AA41C42F355}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VaughnVernon.Mockroservices.Tests", "VaughnVernon.Mockroservices.Tests\VaughnVernon.Mockroservices.Tests.csproj", "{5E7BB4DE-4C36-49CE-9621-88D7F40B558B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +22,10 @@ Global
 		{13749012-6F4A-4D48-9A85-4AA41C42F355}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13749012-6F4A-4D48-9A85-4AA41C42F355}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13749012-6F4A-4D48-9A85-4AA41C42F355}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E7BB4DE-4C36-49CE-9621-88D7F40B558B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E7BB4DE-4C36-49CE-9621-88D7F40B558B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E7BB4DE-4C36-49CE-9621-88D7F40B558B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E7BB4DE-4C36-49CE-9621-88D7F40B558B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

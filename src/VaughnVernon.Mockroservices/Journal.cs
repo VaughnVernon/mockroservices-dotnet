@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using VaughnVernon.Mockroservices.VaughnVernon.Mockroservices;
 
 namespace VaughnVernon.Mockroservices
 {

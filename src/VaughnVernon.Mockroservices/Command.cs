@@ -14,39 +14,38 @@
 
 using System;
 using System.Collections.Generic;
-using VaughnVernon.Mockroservices.VaughnVernon.Mockroservices;
 
 namespace VaughnVernon.Mockroservices
 {
-    public abstract class DomainEvent : ISourceType
+    public abstract class Command : ISourceType
     {
 		public long OccurredOn { get; private set; }
-		public int EventVersion { get; private set; }
+		public int CommandVersion { get; private set; }
 
-		public static DomainEvent NULL = new NullDomainEvent();
+		public static Command NULL = new NullCommand();
 
-		public static List<DomainEvent> All(params DomainEvent[] domainEvents)
+		public static List<Command> All(params Command[] commands)
 		{
-			return All(new List<DomainEvent>(domainEvents));
+			return All(new List<Command>(commands));
 		}
 
-		public static List<DomainEvent> All(List<DomainEvent> domainEvents)
+		public static List<Command> All(List<Command> commands)
 		{
-			List<DomainEvent> all = new List<DomainEvent>(domainEvents.Count);
+			List<Command> all = new List<Command>(commands.Count);
 
-			foreach (DomainEvent domainEvent in domainEvents)
+			foreach (Command command in commands)
 			{
-				if (!domainEvent.IsNull())
+				if (!command.IsNull())
 				{
-					all.Add(domainEvent);
+					all.Add(command);
 				}
 			}
 			return all;
 		}
 
-		public static List<DomainEvent> None()
+		public static List<Command> None()
 		{
-			return new List<DomainEvent>(0);
+			return new List<Command>(0);
 		}
 
 		public virtual bool IsNull()
@@ -54,18 +53,18 @@ namespace VaughnVernon.Mockroservices
 			return false;
 		}
 
-		protected DomainEvent()
+		protected Command()
 			: this(1)
 		{
 		}
 
-		protected DomainEvent(int eventVersion)
+		protected Command(int commandVersion)
 		{
 			OccurredOn = DateTime.Now.Ticks;
-			EventVersion = eventVersion;
+			CommandVersion = commandVersion;
 		}
 
-		internal class NullDomainEvent : DomainEvent
+		internal class NullCommand : Command
 		{
 			public override bool IsNull()
 			{
