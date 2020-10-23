@@ -3,10 +3,11 @@
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF54FF2F-CFFF-4334-8469-6B1DE560FDFA}"
-	ProjectSection(SolutionItems) = preProject
-		LICENSE.txt = LICENSE.txt
-		README.md = README.md
-	EndProjectSection
+ProjectSection(SolutionItems) = preProject
+	..\appveyor.yml = ..\appveyor.yml
+	..\README.md = ..\README.md
+	..\LICENSE = ..\LICENSE
+EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "src", "VaughnVernon.Mockroservices\VaughnVernon.Mockroservices.csproj", "{13749012-6F4A-4D48-9A85-4AA41C42F355}"
 EndProject
