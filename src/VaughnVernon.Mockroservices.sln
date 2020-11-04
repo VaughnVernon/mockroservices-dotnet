@@ -9,7 +9,7 @@ ProjectSection(SolutionItems) = preProject
 	..\LICENSE = ..\LICENSE
 EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "src", "VaughnVernon.Mockroservices\VaughnVernon.Mockroservices.csproj", "{13749012-6F4A-4D48-9A85-4AA41C42F355}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VaughnVernon.Mockroservices", "VaughnVernon.Mockroservices\VaughnVernon.Mockroservices.csproj", "{13749012-6F4A-4D48-9A85-4AA41C42F355}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VaughnVernon.Mockroservices.Tests", "VaughnVernon.Mockroservices.Tests\VaughnVernon.Mockroservices.Tests.csproj", "{5E7BB4DE-4C36-49CE-9621-88D7F40B558B}"
 EndProject

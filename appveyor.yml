@@ -11,7 +11,7 @@ before_build:
   - dotnet restore src/VaughnVernon.Mockroservices.sln
 build:
   project: src/VaughnVernon.Mockroservices.sln
-  verbosity: normal
+  verbosity: minimal
   publish_nuget: true
 for:
   -
