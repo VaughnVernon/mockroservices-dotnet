@@ -1,0 +1,55 @@
+version: 0.0.{build}
+image:
+  - Visual Studio 2019
+  - Ubuntu
+  - macOS
+  - macOS-Mojave
+configuration: Release
+skip_commits:
+  message: /.*\[ci\-skip\].*/
+before_build:
+  - dotnet restore src/VaughnVernon.Mockroservices.sln
+build:
+  project: src/VaughnVernon.Mockroservices.sln
+  verbosity: minimal
+  publish_nuget: true
+for:
+  -
+    matrix:
+      only:
+        - image: Ubuntu
+    before_test:
+      - sudo ufw disable
+    after_test:
+      - sudo ufw enable
+  -
+    matrix:
+      only:
+        - image: macOS
+        - image: macOS-Mojave
+    before_test:
+      - sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 0
+      - sudo launchctl unload /System/Library/LaunchDaemons/com.apple.alf.agent.plist
+      - sudo launchctl load /System/Library/LaunchDaemons/com.apple.alf.agent.plist
+    after_test:
+      - sudo defaults write /Library/Preferences/com.apple.alf globalstate -int 1
+      - sudo launchctl unload /System/Library/LaunchDaemons/com.apple.alf.agent.plist
+      - sudo launchctl load /System/Library/LaunchDaemons/com.apple.alf.agent.plist
+  -
+    matrix:
+      only:
+        - image: Visual Studio 2019
+    before_test:
+      - netsh advfirewall set currentprofile state off
+    after_test:
+      - netsh advfirewall set  currentprofile state on
+test_script:
+  - dotnet test src/VaughnVernon.Mockroservices.Tests
+deploy:
+  - provider: NuGet
+    api_key:
+      secure: QLNaHZSit7KZnYVTBKL+qXhgwTdYWsgYOQa1m3t+05rKIRl0l79jtKJdzsKiSlCv
+    skip_symbols: true
+    artifact: /.*\.nupkg/
+    on:
+      branch: master
