@@ -13,6 +13,7 @@
 //   limitations under the License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -20,33 +21,36 @@ namespace VaughnVernon.Mockroservices
 {
     public class Journal
     {
-        private static Dictionary<string, Journal> journals = new Dictionary<string, Journal>();
+        private static readonly Dictionary<string, Journal> Journals = new Dictionary<string, Journal>();
 
-        private Dictionary<string, JournalReader> readers;
-        private List<EntryValue> store;
+        private readonly Dictionary<string, JournalReader> readers;
+        private readonly List<EntryValue> store;
 
         public static Journal Open(string name)
         {
-            if (journals.ContainsKey(name))
+            if (Journals.ContainsKey(name))
             {
-                return journals[name];
+                return Journals[name];
             }
 
             var eventJournal = new Journal(name);
 
-            journals.Add(name, eventJournal);
+            Journals.Add(name, eventJournal);
 
             return eventJournal;
         }
 
         public void Close()
         {
-            store.Clear();
+            lock (((ICollection)store).SyncRoot)
+            {
+                store.Clear();
+            }
             readers.Clear();
-            journals.Remove(Name);
+            Journals.Remove(Name);
         }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public JournalReader Reader(string name)
         {
@@ -62,14 +66,11 @@ namespace VaughnVernon.Mockroservices
             return reader;
         }
 
-        public EntryStreamReader StreamReader()
-        {
-            return new EntryStreamReader(this);
-        }
+        public EntryStreamReader StreamReader() => new EntryStreamReader(this);
 
         public void Write(EntryBatch batch)
         {
-            lock (store)
+            lock (((ICollection)store).SyncRoot)
             {
 				foreach (var entry in batch.Entries)
 				{
@@ -80,7 +81,7 @@ namespace VaughnVernon.Mockroservices
 
         public void Write<T>(string streamName, int streamVersion, EntryBatch batch)
         {
-            lock (store)
+            lock (((ICollection)store).SyncRoot)
             {
                 foreach (var entry in batch.Entries)
                 {
@@ -91,7 +92,7 @@ namespace VaughnVernon.Mockroservices
         
         public void Write(string streamName, int streamVersion, EntryBatch batch)
         {
-            lock (store)
+            lock (((ICollection)store).SyncRoot)
             {
 				foreach (var entry in batch.Entries)
 				{
@@ -109,7 +110,7 @@ namespace VaughnVernon.Mockroservices
 
         internal EntryValue EntryValueAt(int id)
         {
-            lock (store)
+            lock (((ICollection)store).SyncRoot)
             {
                 if (id >= store.Count)
                 {
@@ -120,15 +121,21 @@ namespace VaughnVernon.Mockroservices
             }
         }
 
-        internal int GreatestId { get { return store.Count - 1; } }
+        internal int GreatestId { get
+        {
+            lock (((ICollection)store).SyncRoot)
+            {
+                return store.Count - 1;
+            }
+        } }
 
         internal EntryStream ReadStream(string streamName)
         {
-            lock (store)
+            lock (((ICollection)store).SyncRoot)
             {
                 var values = new List<EntryValue>();
                 var storeCopy = new List<EntryValue>(store);
-                EntryValue latestSnapshotValue = null;
+                EntryValue? latestSnapshotValue = null;
 
                 foreach (var value in storeCopy)
                 {
@@ -157,22 +164,17 @@ namespace VaughnVernon.Mockroservices
     public class JournalPublisher
     {
         private volatile bool closed;
-        private Thread dispatcherThread;
-        private JournalReader reader;
-        private Topic topic;
+        private readonly Thread dispatcherThread;
+        private readonly JournalReader reader;
+        private readonly Topic topic;
 
         public static JournalPublisher From(
             string journalName,
             string messageBusName,
-            string topicName)
-        {
-            return new JournalPublisher(journalName, messageBusName, topicName);
-        }
+            string topicName) =>
+            new JournalPublisher(journalName, messageBusName, topicName);
 
-        public void Close()
-        {
-            closed = true;
-        }
+        public void Close() => closed = true;
 
         protected JournalPublisher(
             string journalName,
@@ -225,7 +227,7 @@ namespace VaughnVernon.Mockroservices
 
     public class JournalReader
     {
-        private Journal journal;
+        private readonly Journal journal;
         private int readSequence;
 
         public void Acknowledge(long id)
@@ -244,7 +246,7 @@ namespace VaughnVernon.Mockroservices
             }
         }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public StoredSource ReadNext()
         {
@@ -256,10 +258,7 @@ namespace VaughnVernon.Mockroservices
             return new StoredSource(StoredSource.NO_ID, new EntryValue("", EntryValue.NO_STREAM_VERSION, "", "", ""));
         }
 
-        public void Reset()
-        {
-            readSequence = 0;
-        }
+        public void Reset() => readSequence = 0;
 
         internal JournalReader(string name, Journal eventJournal)
         {
@@ -271,15 +270,12 @@ namespace VaughnVernon.Mockroservices
 
     public class EntryStream
     {
-        public string Snapshot { get; private set; }
-        public List<EntryValue> Stream { get; private set; }
-        public string StreamName { get; private set; }
-        public int StreamVersion { get; private set; }
+        public string Snapshot { get; }
+        public List<EntryValue> Stream { get; }
+        public string StreamName { get; }
+        public int StreamVersion { get; }
 
-        public bool HasSnapshot()
-        {
-            return Snapshot.Length > 0;
-        }
+        public bool HasSnapshot() => Snapshot.Length > 0;
 
         internal EntryStream(string streamName, int streamVersion, List<EntryValue> stream, string snapshot)
         {
@@ -292,45 +288,30 @@ namespace VaughnVernon.Mockroservices
 
     public class EntryStreamReader
     {
-        private Journal journal;
+        private readonly Journal journal;
 
-        public EntryStream StreamFor(string streamName)
-        {
-            return journal.ReadStream(streamName);
-        }
-        
-        public EntryStream StreamFor<T>(string streamName)
-        {
-            return journal.ReadStream(StreamNameBuilder.BuildStreamNameFor<T>(streamName));
-        }
+        public EntryStream StreamFor(string streamName) => journal.ReadStream(streamName);
 
-        internal EntryStreamReader(Journal journal)
-        {
-            this.journal = journal;
-        }
+        public EntryStream StreamFor<T>(string streamName) => journal.ReadStream(StreamNameBuilder.BuildStreamNameFor<T>(streamName));
+
+        internal EntryStreamReader(Journal journal) => this.journal = journal;
     }
 
     public class EntryValue
     {
         public static int NO_STREAM_VERSION = -1;
 
-        public string Body { get; private set; }
-        public string Snapshot { get; private set; }
-        public string StreamName { get; private set; }
-        public int StreamVersion { get; private set; }
-        public string Type { get; private set; }
+        public string Body { get; }
+        public string Snapshot { get; }
+        public string StreamName { get; }
+        public int StreamVersion { get; }
+        public string Type { get; }
 
-        public bool HasSnapshot()
-        {
-            return Snapshot.Length > 0;
-        }
+        public bool HasSnapshot() => Snapshot.Length > 0;
 
-        public override int GetHashCode()
-        {
-            return StreamName.GetHashCode() + StreamVersion;
-        }
+        public override int GetHashCode() => StreamName.GetHashCode() + StreamVersion;
 
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             if (other == null || other.GetType() != typeof(EntryValue))
             {
@@ -346,11 +327,7 @@ namespace VaughnVernon.Mockroservices
                 Snapshot.Equals(otherEntryValue.Snapshot);
         }
 
-        public override string ToString()
-        {
-            return
-                $"EntryValue[streamName={StreamName} StreamVersion={StreamVersion} type={Type} body={Body} snapshot={Snapshot}]";
-        }
+        public override string ToString() => $"EntryValue[streamName={StreamName} StreamVersion={StreamVersion} type={Type} body={Body} snapshot={Snapshot}]";
 
         internal EntryValue(
             string streamName,
@@ -372,20 +349,14 @@ namespace VaughnVernon.Mockroservices
     {
         public static long NO_ID = -1L;
 
-        public EntryValue EntryValue { get; private set; }
-        public long Id { get; private set; }
+        public EntryValue EntryValue { get; }
+        public long Id { get; }
 
-        public bool IsValid()
-        {
-            return Id != NO_ID;
-        }
+        public bool IsValid() => Id != NO_ID;
 
-        public override int GetHashCode()
-        {
-            return EntryValue.GetHashCode() + (int)Id;
-        }
+        public override int GetHashCode() => EntryValue.GetHashCode() + (int)Id;
 
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             if (other == null || other.GetType() != typeof(StoredSource))
             {
@@ -397,10 +368,7 @@ namespace VaughnVernon.Mockroservices
             return Id == otherStoredSource.Id && EntryValue.Equals(otherStoredSource.EntryValue);
         }
 
-        public override string ToString()
-        {
-            return $"StoredSource[id={Id} entryValue={EntryValue}]";
-        }
+        public override string ToString() => $"StoredSource[id={Id} entryValue={EntryValue}]";
 
         internal StoredSource(long id, EntryValue eventValue)
         {
@@ -411,57 +379,40 @@ namespace VaughnVernon.Mockroservices
 
 	public class EntryBatch
 	{
-		public List<Entry> Entries { get; private set; }
+		public List<Entry> Entries { get; }
 
-		public static EntryBatch Of(string type, string body)
-		{
-			return new EntryBatch(type, body);
-		}
+		public static EntryBatch Of(string type, string body) => new EntryBatch(type, body);
 
-		public static EntryBatch Of(string type, string body, string snapshot)
-		{
-			return new EntryBatch(type, body, snapshot);
-		}
+        public static EntryBatch Of(string type, string body, string snapshot) => new EntryBatch(type, body, snapshot);
 
-		public EntryBatch()
+        public EntryBatch()
 			: this(2)
 		{
 		}
 
-		public EntryBatch(int entries)
-		{
-			Entries = new List<Entry>(entries);
-		}
+		public EntryBatch(int entries) => Entries = new List<Entry>(entries);
 
-		public EntryBatch(string type, string body)
+        public EntryBatch(string type, string body)
 			: this(type, body, "")
 		{
 		}
 
 		public EntryBatch(string type, string body, string snapshot)
-			: this()
-		{
-			AddEntry(type, body, snapshot);
-		}
+			: this() =>
+            AddEntry(type, body, snapshot);
 
-		public void AddEntry(string type, string body)
-		{
-			Entries.Add(new Entry(type, body));
-		}
+        public void AddEntry(string type, string body) => Entries.Add(new Entry(type, body));
 
-		public void AddEntry(string type, string body, string snapshot)
-		{
-			Entries.Add(new Entry(type, body, snapshot));
-		}
+        public void AddEntry(string type, string body, string snapshot) => Entries.Add(new Entry(type, body, snapshot));
 
-		public class Entry
+        public class Entry
 		{
-			public string Body { get; private set; }
-			public string Type { get; private set; }
-			public string Snapshot { get; private set; }
+			public string Body { get; }
+			public string Type { get; }
+			public string Snapshot { get; }
 
 			internal Entry(string type, string body)
-				: this(type, body, "")
+				: this(type, body, string.Empty)
 			{
 			}
 
