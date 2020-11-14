@@ -14,15 +14,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace VaughnVernon.Mockroservices
 {
+	[SuppressMessage("ReSharper", "InconsistentNaming")]
 	public class KVStore
 	{
-		private static Dictionary<string, KVStore> stores = new Dictionary<string, KVStore>();
+		private static readonly Dictionary<string, KVStore> stores = new Dictionary<string, KVStore>();
 
-		public string Name { get; private set; }
-		private Dictionary<string, string> Store { get; set; }
+		public string Name { get; }
+		private Dictionary<string, string> Store { get; }
 
 		public static KVStore Open(string name)
 		{
@@ -43,20 +45,14 @@ namespace VaughnVernon.Mockroservices
 			return store;
 		}
 
-		public string Get(string key)
-		{
-			return Store[key];
-		}
+		public string Get(string key) => Store[key];
 
-		public void Put(string key, string value)
-		{
-			Store.Add(key, value);
-		}
+		public void Put(string key, string value) => Store.Add(key, value);
 
 		private KVStore(string name)
 		{
-			this.Name = name;
-			this.Store = new Dictionary<string, string>();
+			Name = name;
+			Store = new Dictionary<string, string>();
 		}
 	}
 }
