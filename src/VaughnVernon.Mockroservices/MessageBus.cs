@@ -21,27 +21,27 @@ namespace VaughnVernon.Mockroservices
 {
     public class MessageBus
     {
-        private static Dictionary<string, MessageBus> messageBuses = new Dictionary<string, MessageBus>();
+        private static readonly Dictionary<string, MessageBus> MessageBuses = new Dictionary<string, MessageBus>();
 
-        private Dictionary<string, Topic> topics;
+        private readonly Dictionary<string, Topic> topics;
 
         public static MessageBus Start(string name)
         {
-            lock (messageBuses)
+            lock (MessageBuses)
             {
-                if (messageBuses.ContainsKey(name))
+                if (MessageBuses.ContainsKey(name))
                 {
-                    return messageBuses[name];
+                    return MessageBuses[name];
                 }
 
                 MessageBus messageBus = new MessageBus(name);
-                messageBuses.Add(name, messageBus);
+                MessageBuses.Add(name, messageBus);
 
                 return messageBus;
             }
         }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public Topic OpenTopic(string name)
         {
@@ -61,28 +61,25 @@ namespace VaughnVernon.Mockroservices
 
         protected MessageBus(string name)
         {
-            this.Name = name;
-            this.topics = new Dictionary<string, Topic>();
+            Name = name;
+            topics = new Dictionary<string, Topic>();
         }
     }
 
     public class Message
     {
-        public string Id { get; private set; }
-        public string Payload { get; private set; }
-        public string Type { get; private set; }
+        public string Id { get; }
+        public string Payload { get; }
+        public string Type { get; }
 
         public Message(string id, string type, string payload)
         {
-            this.Id = id;
-            this.Type = type;
-            this.Payload = payload;
+            Id = id;
+            Type = type;
+            Payload = payload;
         }
 
-        public string SimpleTypeName()
-        {
-            return Type.Split(',')[0];
-        }
+        public string SimpleTypeName() => Type.Split(',')[0];
     }
 
     public interface ISubscriber
@@ -93,9 +90,9 @@ namespace VaughnVernon.Mockroservices
     public class Topic
     {
         private volatile bool closed;
-        private Thread dispatcherThread;
-        private ConcurrentQueue<Message> queue;
-        private HashSet<ISubscriber> subscribers;
+        private readonly Thread dispatcherThread;
+        private readonly ConcurrentQueue<Message> queue;
+        private readonly HashSet<ISubscriber> subscribers;
 
         public void Close()
         {
@@ -107,12 +104,9 @@ namespace VaughnVernon.Mockroservices
             closed = true;
         }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
-        public void Publish(Message message)
-        {
-            queue.Enqueue(message);
-        }
+        public void Publish(Message message) => queue.Enqueue(message);
 
         public void Subscribe(ISubscriber subscriber)
         {
@@ -124,11 +118,11 @@ namespace VaughnVernon.Mockroservices
 
         internal Topic(string name)
         {
-            this.Name = name;
-            this.closed = false;
-            this.dispatcherThread = new Thread(new ThreadStart(this.DispatchEach));
-            this.queue = new ConcurrentQueue<Message>();
-            this.subscribers = new HashSet<ISubscriber>();
+            Name = name;
+            closed = false;
+            dispatcherThread = new Thread(DispatchEach);
+            queue = new ConcurrentQueue<Message>();
+            subscribers = new HashSet<ISubscriber>();
 
             StartDispatcherThread();
         }
@@ -141,8 +135,7 @@ namespace VaughnVernon.Mockroservices
                 {
                     if (subscribers.Count > 0)
                     {
-                        Message message;
-                        if (queue.TryDequeue(out message))
+                        if (queue.TryDequeue(out Message message))
                         {
                             foreach (ISubscriber subscriber in subscribers)
                             {
