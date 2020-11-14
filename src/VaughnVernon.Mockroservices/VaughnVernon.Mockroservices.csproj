@@ -6,7 +6,7 @@
     
     <!-- NuGet Metadata -->
     <IsPackable>true</IsPackable>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>1.1.0</PackageVersion>
     <PackageId>VaughnVernon.Mockroservices</PackageId>
     <Authors>Vaughn Vernon</Authors>
     <Description>
