@@ -19,21 +19,18 @@ namespace VaughnVernon.Mockroservices
 {
     public abstract class Command : ISourceType
     {
-		public long OccurredOn { get; private set; }
-		public int CommandVersion { get; private set; }
+		public long OccurredOn { get; }
+		public int CommandVersion { get; }
 
-		public static Command NULL = new NullCommand();
+		public static Command Null = new NullCommand();
 
-		public static List<Command> All(params Command[] commands)
-		{
-			return All(new List<Command>(commands));
-		}
+		public static List<Command> All(params Command[] commands) => All(new List<Command>(commands));
 
 		public static List<Command> All(List<Command> commands)
 		{
-			List<Command> all = new List<Command>(commands.Count);
+			var all = new List<Command>(commands.Count);
 
-			foreach (Command command in commands)
+			foreach (var command in commands)
 			{
 				if (!command.IsNull())
 				{
@@ -43,15 +40,9 @@ namespace VaughnVernon.Mockroservices
 			return all;
 		}
 
-		public static List<Command> None()
-		{
-			return new List<Command>(0);
-		}
+		public static List<Command> None() => new List<Command>(0);
 
-		public virtual bool IsNull()
-		{
-			return false;
-		}
+		public virtual bool IsNull() => false;
 
 		protected Command()
 			: this(1)
@@ -66,10 +57,7 @@ namespace VaughnVernon.Mockroservices
 
 		internal class NullCommand : Command
 		{
-			public override bool IsNull()
-			{
-				return true;
-			}
+			public override bool IsNull() => true;
 		}
 	}
 }
