@@ -18,6 +18,8 @@
     <RepositoryUrl>https://github.com/VaughnVernon/mockroservices-dotnet</RepositoryUrl>
     <PackageTags>.net;c#;f#;distributed-programming</PackageTags>
     <Configurations>Debug;Release</Configurations>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
