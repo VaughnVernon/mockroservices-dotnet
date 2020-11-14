@@ -19,21 +19,18 @@ namespace VaughnVernon.Mockroservices
 {
     public abstract class DomainEvent : ISourceType
     {
-		public long OccurredOn { get; private set; }
-		public int EventVersion { get; private set; }
+		public long OccurredOn { get; }
+		public int EventVersion { get; }
 
-		public static DomainEvent NULL = new NullDomainEvent();
+		public static DomainEvent Null = new NullDomainEvent();
 
-		public static List<DomainEvent> All(params DomainEvent[] domainEvents)
-		{
-			return All(new List<DomainEvent>(domainEvents));
-		}
+		public static List<DomainEvent> All(params DomainEvent[] domainEvents) => All(new List<DomainEvent>(domainEvents));
 
 		public static List<DomainEvent> All(List<DomainEvent> domainEvents)
 		{
-			List<DomainEvent> all = new List<DomainEvent>(domainEvents.Count);
+			var all = new List<DomainEvent>(domainEvents.Count);
 
-			foreach (DomainEvent domainEvent in domainEvents)
+			foreach (var domainEvent in domainEvents)
 			{
 				if (!domainEvent.IsNull())
 				{
@@ -43,15 +40,9 @@ namespace VaughnVernon.Mockroservices
 			return all;
 		}
 
-		public static List<DomainEvent> None()
-		{
-			return new List<DomainEvent>(0);
-		}
+		public static List<DomainEvent> None() => new List<DomainEvent>(0);
 
-		public virtual bool IsNull()
-		{
-			return false;
-		}
+		public virtual bool IsNull() => false;
 
 		protected DomainEvent()
 			: this(1)
@@ -66,10 +57,7 @@ namespace VaughnVernon.Mockroservices
 
 		internal class NullDomainEvent : DomainEvent
 		{
-			public override bool IsNull()
-			{
-				return true;
-			}
+			public override bool IsNull() => true;
 		}
 	}
 }
