@@ -31,7 +31,7 @@ namespace VaughnVernon.Mockroservices.Tests
 			store.Put(key, value);
 
 			Assert.AreEqual(name, store.Name);
-			Assert.AreEqual(value, store.get(key));
+			Assert.AreEqual(value, store.Get(key));
 		}
 	}
 }
