@@ -16,17 +16,26 @@ namespace VaughnVernon.Mockroservices.Tests
             topic.Subscribe(subscriber);
             
             var repository = new ProductRepository();
-            var product = new Product(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999);
-            product.ChangeName("dice-fuzzy-1");
-            product.ChangeDescription("Fuzzy dice, and all.");
-            product.ChangePrice(995);
-            repository.Save<Product>(product);
             
-            subscriber.WaitForExpectedMessages(4);
+            var product1 = new Product(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999);
+            product1.ChangeName("dice-fuzzy-1");
+            product1.ChangeDescription("Fuzzy dice, and all.");
+            product1.ChangePrice(995);
+            
+            repository.Save<Product>(product1);
+            
+            var product2 = new Product(Guid.NewGuid().ToString(), "dice-fuz-2", "Fuzzy dice.", 999);
+            product2.ChangeName("dice-fuzzy-2");
+            product2.ChangeDescription("Fuzzy dice, and all 2.");
+            product2.ChangePrice(1000);
+            
+            repository.Save<Product>(product2);
+            
+            subscriber.WaitForExpectedMessages(8);
             topic.Close();
             journalPublisher.Close();
 
-            Assert.AreEqual(4, subscriber.HandledMessages.Count);
+            Assert.AreEqual(8, subscriber.HandledMessages.Count);
         }
     }
     
