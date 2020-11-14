@@ -21,7 +21,7 @@ namespace VaughnVernon.Mockroservices
 {
     public class Serialization
     {
-        public static string Serialize(object instance)
+        public static string Serialize(object? instance)
         {
             string serialization = JsonConvert.SerializeObject(instance, new JsonSerializerSettings
             {
@@ -32,23 +32,23 @@ namespace VaughnVernon.Mockroservices
 
         public static T Deserialize<T>(string serialization)
         {
-            T deserialized = JsonConvert.DeserializeObject<T>(serialization, new JsonSerializerSettings
+            var deserialized = JsonConvert.DeserializeObject<T>(serialization, new JsonSerializerSettings
             {
                 //ContractResolver = new CamelCasePropertyNamesContractResolver()
                 ContractResolver = new PrivateSetterCamelCasePropertyNamesContractResolver()
             });
-            return deserialized;
+            return deserialized!;
         }
 
         public static object Deserialize(string serialization, Type type)
         {
-            object deserialized = JsonConvert.DeserializeObject(serialization, type, new JsonSerializerSettings
+            var deserialized = JsonConvert.DeserializeObject(serialization, type, new JsonSerializerSettings
             {
                 //ContractResolver = new CamelCasePropertyNamesContractResolver()
                 ContractResolver = new PrivateSetterCamelCasePropertyNamesContractResolver()
             });
 
-            return deserialized;
+            return deserialized!;
         }
     }
 }

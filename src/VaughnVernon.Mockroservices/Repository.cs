@@ -25,7 +25,11 @@ namespace VaughnVernon.Mockroservices
             foreach (var source in sources)
             {
                 var eventBody = Serialization.Serialize(source);
-                batch.AddEntry(source.GetType().AssemblyQualifiedName, eventBody);
+                var assemblyQualifiedName = source?.GetType().AssemblyQualifiedName;
+                if (!string.IsNullOrEmpty(assemblyQualifiedName))
+                {
+                    batch.AddEntry(assemblyQualifiedName!, eventBody);   
+                }
             }
             return batch;
         }
@@ -36,8 +40,11 @@ namespace VaughnVernon.Mockroservices
             foreach (var value in stream)
             {
                 var sourceType = Type.GetType(value.Type);
-                var source = (T)Serialization.Deserialize(value.Body, sourceType);
-                sourceStream.Add(source);
+                if (sourceType != null)
+                {
+                    var source = (T)Serialization.Deserialize(value.Body, sourceType);
+                    sourceStream.Add(source);   
+                }
             }
             return sourceStream;
         }

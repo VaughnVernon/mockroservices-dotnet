@@ -21,36 +21,27 @@ namespace VaughnVernon.Mockroservices
         private readonly List<TSource> applied;
         private readonly int currentVersion;
 
-        public List<TSource> Applied
-        {
-            get { return this.applied; }
-        }
+        public List<TSource> Applied => applied;
 
-        public int NextVersion
-        {
-            get { return this.currentVersion + 1; }
-        }
+        public int NextVersion => currentVersion + 1;
 
-        public int CurrentVersion
-        {
-            get { return this.currentVersion; }
-        }
+        public int CurrentVersion => currentVersion;
 
         protected SourcedEntity()
         {
-            this.applied = new List<TSource>();
-            this.currentVersion = 0;
+            applied = new List<TSource>();
+            currentVersion = 0;
         }
 
         protected SourcedEntity(List<TSource> stream, int streamVersion)
             : this()
         {
-            foreach (TSource source in stream)
+            foreach (var source in stream)
             {
                 DispatchWhen(source);
             }
 
-            this.currentVersion = streamVersion;
+            currentVersion = streamVersion;
         }
 
         protected void Apply(TSource source)
@@ -59,9 +50,6 @@ namespace VaughnVernon.Mockroservices
             DispatchWhen(source);
         }
 
-        protected void DispatchWhen(TSource source)
-        {
-            ((dynamic) this).When((dynamic)source);
-        }
+        protected void DispatchWhen(TSource source) => ((dynamic) this).When((dynamic)source!);
     }
 }

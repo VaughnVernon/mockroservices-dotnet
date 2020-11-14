@@ -24,7 +24,6 @@ namespace VaughnVernon.Mockroservices
         }
 
         protected ProcessManager()
-            : base()
         {
         }
 
