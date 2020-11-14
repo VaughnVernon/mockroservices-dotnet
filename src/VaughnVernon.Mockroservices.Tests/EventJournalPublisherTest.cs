@@ -24,26 +24,26 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestEventJournalPublisher()
         {
-            Journal eventJournal = Journal.Open("test-ej");
-            MessageBus messageBus = MessageBus.Start("test-bus");
-            Topic topic = messageBus.OpenTopic("test-topic");
-            JournalPublisher journalPublisher =
+            var eventJournal = Journal.Open("test-ej");
+            var messageBus = MessageBus.Start("test-bus");
+            var topic = messageBus.OpenTopic("test-topic");
+            var journalPublisher =
                 JournalPublisher.From(eventJournal.Name, messageBus.Name, topic.Name);
 
-            JournalPublisherTestSubscriber subscriber = new JournalPublisherTestSubscriber();
+            var subscriber = new JournalPublisherTestSubscriber();
             topic.Subscribe(subscriber);
 
-			EntryBatch batch1 = new EntryBatch();
-			for (int idx = 0; idx < 3; ++idx)
+			var batch1 = new EntryBatch();
+			for (var idx = 0; idx < 3; ++idx)
             {
-				batch1.AddEntry("test1type", "test1instance" + idx);
+				batch1.AddEntry("test1type", $"test1instance{idx}");
             }
 			eventJournal.Write("test1", 0, batch1);
 
-			EntryBatch batch2 = new EntryBatch();
-			for (int idx = 0; idx < 3; ++idx)
+			var batch2 = new EntryBatch();
+			for (var idx = 0; idx < 3; ++idx)
             {
-				batch2.AddEntry("test2type", "test2instance" + idx);
+				batch2.AddEntry("test2type", $"test2instance{idx}");
             }
 			eventJournal.Write("test2", 0, batch2);
 
@@ -53,31 +53,26 @@ namespace VaughnVernon.Mockroservices.Tests
 
             journalPublisher.Close();
 
-            Assert.AreEqual(6, subscriber.handledMessages.Count);
+            Assert.AreEqual(6, subscriber.HandledMessages.Count);
         }
     }
 
     internal class JournalPublisherTestSubscriber : ISubscriber
     {
-        internal List<Message> handledMessages = new List<Message>();
+        internal readonly List<Message> HandledMessages = new List<Message>();
 
-        public void Handle(Message message)
-        {
-            handledMessages.Add(message);
-        }
+        public void Handle(Message message) => HandledMessages.Add(message);
 
         public void WaitForExpectedMessages(int count)
         {
-            for (int idx = 0; idx < 100; ++idx)
+            for (var idx = 0; idx < 100; ++idx)
             {
-                if (handledMessages.Count == count)
+                if (HandledMessages.Count == count)
                 {
                     break;
                 }
-                else
-                {
-                    Thread.Sleep(100);
-                }
+
+                Thread.Sleep(100);
             }
         }
     }

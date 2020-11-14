@@ -22,11 +22,11 @@ namespace VaughnVernon.Mockroservices.Tests
 		[TestMethod]
 		public void TestPutGet()
 		{
-			string key = "k1";
-			string value = "v1";
+			var key = "k1";
+			var value = "v1";
 
-			string name = "test";
-			KVStore store = KVStore.Open(name);
+			var name = "test";
+			var store = KVStore.Open(name);
 
 			store.Put(key, value);
 

@@ -23,16 +23,17 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestExchangeRoundTrip()
         {
-            TestableDomainEvent domainEvent = new TestableDomainEvent(1, "something");
-            string serializedDomainEvent = Serialization.Serialize(domainEvent);
-            Message eventMessage = new Message(Convert.ToString(domainEvent.Id), domainEvent.GetType().Name, serializedDomainEvent);
-            MessageExchangeReader reader = MessageExchangeReader.From(eventMessage);
+            var domainEvent = new TestableDomainEvent(1, "something");
+            var serializedDomainEvent = Serialization.Serialize(domainEvent);
+            var eventMessage = new Message(Convert.ToString(domainEvent.Id), domainEvent.GetType().Name, serializedDomainEvent);
+            var reader = MessageExchangeReader.From(eventMessage);
             Assert.AreEqual(eventMessage.Id, reader.Id);
             Assert.AreEqual(eventMessage.Type, reader.Type);
             Assert.AreEqual(domainEvent.Id, reader.IdAsLong);
             Assert.AreEqual(domainEvent.Name, reader.PayloadStringValue("name"));
-            Assert.AreEqual(domainEvent.EventVersion, reader.PayloadIntegerValue("eventVersion"));
-            Assert.AreEqual(domainEvent.OccurredOn, reader.PayloadLongValue("occurredOn"));
+            Assert.AreEqual(domainEvent.Version, reader.PayloadIntegerValue("version"));
+            Assert.AreEqual(domainEvent.OccurredOn, reader.PayloadDateTimeOffsetValue("occurredOn"));
+            Assert.AreEqual(domainEvent.ValidOn, reader.PayloadDateTimeOffsetValue("validOn"));
         }
     }
 }

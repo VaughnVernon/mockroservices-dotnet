@@ -23,22 +23,22 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestSerializationDeserialization()
         {
-            Person person1 = new Person("First Middle Last, Jr.", DateTime.Now);
+            var person1 = new Person("First Middle Last, Jr.", DateTime.Now);
             Assert.IsNotNull(person1);
-            string jsonPerson1 = Serialization.Serialize(person1);
-            Person person2 = Serialization.Deserialize<Person>(jsonPerson1);
+            var jsonPerson1 = Serialization.Serialize(person1);
+            var person2 = Serialization.Deserialize<Person>(jsonPerson1);
             Assert.IsNotNull(person2);
             Assert.AreEqual(person1, person2);
-            string jsonPerson2 = Serialization.Serialize(person2);
+            var jsonPerson2 = Serialization.Serialize(person2);
             Assert.AreEqual(jsonPerson1, jsonPerson2);
         }
 
         [TestMethod]
         public void TestDeserializationToClientClass()
         {
-            Person person = new Person("First Middle Last, Jr.", DateTime.Now);
-            string jsonPerson = Serialization.Serialize(person);
-            ClientPerson clientPerson = Serialization.Deserialize<ClientPerson>(jsonPerson);
+            var person = new Person("First Middle Last, Jr.", DateTime.Now);
+            var jsonPerson = Serialization.Serialize(person);
+            var clientPerson = Serialization.Deserialize<ClientPerson>(jsonPerson);
             Assert.AreEqual(person.Name, clientPerson.Name);
             Assert.AreEqual(person.BirthDate, clientPerson.BirthDate);
         }
@@ -46,8 +46,8 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestDeserializationAgainstPrivateSetter()
         {
-            Person person = new Person("First Middle Last, Jr.", DateTime.Now);
-            string jsonPerson = Serialization.Serialize(person);
+            var person = new Person("First Middle Last, Jr.", DateTime.Now);
+            var jsonPerson = Serialization.Serialize(person);
             var clientPerson = Serialization.Deserialize<ClientPersonWithPrivateSetter>(jsonPerson);
             Assert.AreEqual(person.Name, clientPerson.Name);
             Assert.AreEqual(person.BirthDate, clientPerson.BirthDate);

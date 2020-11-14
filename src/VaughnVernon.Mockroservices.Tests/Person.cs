@@ -20,8 +20,8 @@ namespace VaughnVernon.Mockroservices.Tests
 {
     public class Person
     {
-        public DateTime BirthDate { get; private set; }
-        public string Name { get; private set; }
+        public DateTime BirthDate { get; }
+        public string Name { get; }
 
         public override bool Equals(object other)
         {
@@ -30,20 +30,17 @@ namespace VaughnVernon.Mockroservices.Tests
                 return false;
             }
 
-            Person otherPerson = (Person)other;
+            var otherPerson = (Person)other;
 
-            return this.Name.Equals(otherPerson.Name) && this.BirthDate.Equals(otherPerson.BirthDate);
+            return Name.Equals(otherPerson.Name) && BirthDate.Equals(otherPerson.BirthDate);
         }
 
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() + BirthDate.GetHashCode();
-        }
+        public override int GetHashCode() => Name.GetHashCode() + BirthDate.GetHashCode();
 
         public Person(string name, DateTime birthDate)
         {
-            this.Name = name;
-            this.BirthDate = birthDate;
+            Name = name;
+            BirthDate = birthDate;
         }
     }
 
@@ -61,11 +58,10 @@ namespace VaughnVernon.Mockroservices.Tests
         public ClientPersonWithPrivateSetter() { }
 
         public static ClientPersonWithPrivateSetter Instance(
-            string name, DateTime birthDate)
-        {
-            return new ClientPersonWithPrivateSetter(
+            string name, DateTime birthDate) =>
+            new ClientPersonWithPrivateSetter(
                 name, birthDate);
-        }
+
         private ClientPersonWithPrivateSetter(string name, DateTime birthDate)
         {
             Name = name;
@@ -76,10 +72,7 @@ namespace VaughnVernon.Mockroservices.Tests
     public class PersonES : SourcedEntity<DomainEvent>
     {
         [JsonConstructor]
-        public PersonES(string name, int age, DateTime birthDate)
-        {
-            Apply(new PersonNamed(Guid.NewGuid().ToString(), name, age, birthDate));
-        }
+        public PersonES(string name, int age, DateTime birthDate) => Apply(new PersonNamed(Guid.NewGuid().ToString(), name, age, birthDate));
 
         public PersonES(List<DomainEvent> stream, int streamVersion)
             : base(stream, streamVersion)
@@ -105,28 +98,22 @@ namespace VaughnVernon.Mockroservices.Tests
                 return false;
             }
 
-            PersonES otherPerson = (PersonES)other;
+            var otherPerson = (PersonES)other;
 
-            return this.Id.Equals(otherPerson.Id) && this.Name.Equals(otherPerson.Name) && this.Age == otherPerson.Age;
+            return Id.Equals(otherPerson.Id) && Name.Equals(otherPerson.Name) && Age == otherPerson.Age;
         }
 
-        public override int GetHashCode()
-        {
-            return 31 * Id.GetHashCode() * Name.GetHashCode() * Age.GetHashCode();
-        }
+        public override int GetHashCode() => 31 * Id.GetHashCode() * Name.GetHashCode() * Age.GetHashCode();
 
-        public override string ToString()
-        {
-            return "PersonES [Id=" + Id + " Name=" + Name + " Age=" + Age + "]";
-        }
+        public override string ToString() => $"PersonES [Id={Id} Name={Name} Age={Age}]";
     }
 
     public class PersonNamed : DomainEvent
     {
-        public string Id { get; private set; }
-        public string Name { get; private set; }
-        public int Age { get; private set; }
-        public DateTime BirthDate { get; private set; }
+        public string Id { get; }
+        public string Name { get; }
+        public int Age { get; }
+        public DateTime BirthDate { get; }
 
         public PersonNamed(string id, string name, int age, DateTime birthDate)
         {

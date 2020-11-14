@@ -23,18 +23,18 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestMessageBusStart()
         {
-            MessageBus messageBus = MessageBus.Start("test_bus");
+            var messageBus = MessageBus.Start("test_bus");
             Assert.IsNotNull(messageBus);
         }
 
         [TestMethod]
         public void TestTopicOpen()
         {
-            MessageBus messageBus = MessageBus.Start("test_bus");
+            var messageBus = MessageBus.Start("test_bus");
             Assert.IsNotNull(messageBus);
-            Topic topic = messageBus.OpenTopic("test_topic");
+            var topic = messageBus.OpenTopic("test_topic");
             Assert.IsNotNull(topic);
-            Topic topicAgain = messageBus.OpenTopic("test_topic");
+            var topicAgain = messageBus.OpenTopic("test_topic");
             Assert.AreSame(topic, topicAgain);
             topic.Close();
         }
@@ -42,9 +42,9 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestTopicPubSub()
         {
-            MessageBus messageBus = MessageBus.Start("test_bus2");
-            Topic topic = messageBus.OpenTopic("test_topic");
-            MessageBusTestSubscriber subscriber = new MessageBusTestSubscriber();
+            var messageBus = MessageBus.Start("test_bus2");
+            var topic = messageBus.OpenTopic("test_topic");
+            var subscriber = new MessageBusTestSubscriber();
             topic.Subscribe(subscriber);
             topic.Publish(new Message("1", "type1", "test1"));
             topic.Publish(new Message("2", "type2", "test2"));
@@ -52,26 +52,23 @@ namespace VaughnVernon.Mockroservices.Tests
 
             topic.Close();
 
-            Assert.AreEqual(3, subscriber.handledMessages.Count);
-            Assert.AreEqual("1", subscriber.handledMessages[0].Id);
-            Assert.AreEqual("type1", subscriber.handledMessages[0].Type);
-            Assert.AreEqual("test1", subscriber.handledMessages[0].Payload);
-            Assert.AreEqual("2", subscriber.handledMessages[1].Id);
-            Assert.AreEqual("type2", subscriber.handledMessages[1].Type);
-            Assert.AreEqual("test2", subscriber.handledMessages[1].Payload);
-            Assert.AreEqual("3", subscriber.handledMessages[2].Id);
-            Assert.AreEqual("type3", subscriber.handledMessages[2].Type);
-            Assert.AreEqual("test3", subscriber.handledMessages[2].Payload);
+            Assert.AreEqual(3, subscriber.HandledMessages.Count);
+            Assert.AreEqual("1", subscriber.HandledMessages[0].Id);
+            Assert.AreEqual("type1", subscriber.HandledMessages[0].Type);
+            Assert.AreEqual("test1", subscriber.HandledMessages[0].Payload);
+            Assert.AreEqual("2", subscriber.HandledMessages[1].Id);
+            Assert.AreEqual("type2", subscriber.HandledMessages[1].Type);
+            Assert.AreEqual("test2", subscriber.HandledMessages[1].Payload);
+            Assert.AreEqual("3", subscriber.HandledMessages[2].Id);
+            Assert.AreEqual("type3", subscriber.HandledMessages[2].Type);
+            Assert.AreEqual("test3", subscriber.HandledMessages[2].Payload);
         }
     }
 
     internal class MessageBusTestSubscriber : ISubscriber
     {
-        internal List<Message> handledMessages = new List<Message>();
+        internal readonly List<Message> HandledMessages = new List<Message>();
 
-        public void Handle(Message message)
-        {
-            handledMessages.Add(message);
-        }
+        public void Handle(Message message) => HandledMessages.Add(message);
     }
 }

@@ -19,8 +19,11 @@ namespace VaughnVernon.Mockroservices
 {
     public abstract class DomainEvent : ISourceType
     {
-		public long OccurredOn { get; }
-		public int EventVersion { get; }
+		public DateTimeOffset OccurredOn { get; }
+		
+		public DateTimeOffset ValidOn { get; }
+		
+		public int Version { get; }
 
 		public static DomainEvent Null = new NullDomainEvent();
 
@@ -45,14 +48,22 @@ namespace VaughnVernon.Mockroservices
 		public virtual bool IsNull() => false;
 
 		protected DomainEvent()
-			: this(1)
+			: this(0)
 		{
 		}
 
-		protected DomainEvent(int eventVersion)
+		protected DomainEvent(int version)
 		{
-			OccurredOn = DateTime.Now.Ticks;
-			EventVersion = eventVersion;
+			OccurredOn = DateTimeOffset.Now;
+			ValidOn = DateTimeOffset.Now;
+			Version = version;
+		}
+		
+		protected DomainEvent(DateTimeOffset validOn, int version)
+		{
+			OccurredOn = DateTimeOffset.Now;
+			ValidOn = validOn;
+			Version = version;
 		}
 
 		internal class NullDomainEvent : DomainEvent

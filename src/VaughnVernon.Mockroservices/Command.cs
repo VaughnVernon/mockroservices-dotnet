@@ -19,8 +19,11 @@ namespace VaughnVernon.Mockroservices
 {
     public abstract class Command : ISourceType
     {
-		public long OccurredOn { get; }
-		public int CommandVersion { get; }
+		public DateTimeOffset OccurredOn { get; }
+		
+		public DateTimeOffset ValidOn { get; }
+		
+		public int Version { get; }
 
 		public static Command Null = new NullCommand();
 
@@ -45,14 +48,22 @@ namespace VaughnVernon.Mockroservices
 		public virtual bool IsNull() => false;
 
 		protected Command()
-			: this(1)
+			: this(0)
 		{
 		}
 
-		protected Command(int commandVersion)
+		protected Command(int version)
 		{
-			OccurredOn = DateTime.Now.Ticks;
-			CommandVersion = commandVersion;
+			OccurredOn = DateTimeOffset.Now;
+			ValidOn = DateTimeOffset.Now;
+			Version = version;
+		}
+		
+		protected Command(DateTimeOffset validOn, int version)
+		{
+			OccurredOn = DateTimeOffset.Now;
+			ValidOn = validOn;
+			Version = version;
 		}
 
 		internal class NullCommand : Command

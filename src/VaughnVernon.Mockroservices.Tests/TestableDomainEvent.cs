@@ -16,14 +16,13 @@
 {
     public class TestableDomainEvent : DomainEvent
     {
-        public long Id { get; private set; }
-        public string Name { get; private set; }
+        public long Id { get; }
+        public string Name { get; }
 
         public TestableDomainEvent(long id, string name)
-            : base()
         {
-            this.Id = id;
-            this.Name = name;
+            Id = id;
+            Name = name;
         }
     }
 }

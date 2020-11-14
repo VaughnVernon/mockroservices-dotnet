@@ -64,17 +64,15 @@ namespace VaughnVernon.Mockroservices
             return stringValue == null ? false : Convert.ToBoolean(stringValue);
         }
 
-        public DateTime PayloadDateTimeValue(string key)
-        {
-            var longValue = PayloadLongValue(key);
-            return new DateTime(longValue);
-        }
+        public DateTime PayloadDateTimeValue(string key) => new DateTime(PayloadLongValue(key));
 
         public double PayloadDoubleValue(string key) => DynamicPayload?[key];
 
         public int PayloadIntegerValue(string key) => DynamicPayload?[key];
 
         public long PayloadLongValue(string key) => DynamicPayload?[key];
+        
+        public DateTimeOffset PayloadDateTimeOffsetValue(string key) => DynamicPayload?[key];
 
         public string? PayloadStringValue(string key) => DynamicPayload?[key];
 

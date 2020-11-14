@@ -24,7 +24,7 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestProductDefinedEventKept()
         {
-            Product product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
             Assert.AreEqual(1, product.Applied.Count);
             Assert.AreEqual("dice-fuz-1", product.Name);
             Assert.AreEqual("Fuzzy dice.", product.Description);
@@ -35,7 +35,7 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestProductNameChangedEventKept()
         {
-            Product product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
 
             product.Applied.Clear();
 
@@ -48,7 +48,7 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestProductDescriptionChangedEventsKept()
         {
-            Product product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
 
             product.Applied.Clear();
 
@@ -61,7 +61,7 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestProductPriceChangedEventKept()
         {
-            Product product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
 
             product.Applied.Clear();
 
@@ -74,12 +74,12 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestReconstitution()
         {
-            Product product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
             product.ChangeName("dice-fuzzy-1");
             product.ChangeDescription("Fuzzy dice, and all.");
             product.ChangePrice(995);
 
-            Product productAgain = new Product(product.Applied, product.NextVersion);
+            var productAgain = new Product(product.Applied, product.NextVersion);
             Assert.AreEqual(product, productAgain);
         }
     }
@@ -90,30 +90,18 @@ namespace VaughnVernon.Mockroservices.Tests
         public string Description { get; private set; }
         public long Price { get; private set; }
 
-        public Product(string name, string description, long price)
-        {
-            Apply(new ProductDefined(name, description, price));
-        }
+        public Product(string name, string description, long price) => Apply(new ProductDefined(name, description, price));
 
         public Product(List<DomainEvent> eventStream, int streamVersion)
             : base(eventStream, streamVersion)
         {
         }
 
-        public void ChangeDescription(string description)
-        {
-            Apply(new ProductDescriptionChanged(description));
-        }
+        public void ChangeDescription(string description) => Apply(new ProductDescriptionChanged(description));
 
-        public void ChangeName(string name)
-        {
-            Apply(new ProductNameChanged(name));
-        }
+        public void ChangeName(string name) => Apply(new ProductNameChanged(name));
 
-        public void ChangePrice(long price)
-        {
-            Apply(new ProductPriceChanged(price));
-        }
+        public void ChangePrice(long price) => Apply(new ProductPriceChanged(price));
 
         public override bool Equals(Object other)
         {
@@ -122,53 +110,40 @@ namespace VaughnVernon.Mockroservices.Tests
                 return false;
             }
 
-            Product otherProduct = (Product)other;
+            var otherProduct = (Product)other;
 
-            return this.Name.Equals(otherProduct.Name) &&
-                this.Description.Equals(otherProduct.Description) &&
-                this.Price == otherProduct.Price;
+            return Name.Equals(otherProduct.Name) &&
+                Description.Equals(otherProduct.Description) &&
+                Price == otherProduct.Price;
         }
 
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
+        public override int GetHashCode() => Name.GetHashCode();
 
         public void When(ProductDefined e)
         {
-            this.Name = e.Name;
-            this.Description = e.Description;
-            this.Price = e.Price;
+            Name = e.Name;
+            Description = e.Description;
+            Price = e.Price;
         }
 
-        public void When(ProductDescriptionChanged e)
-        {
-            this.Description = e.Description;
-        }
+        public void When(ProductDescriptionChanged e) => Description = e.Description;
 
-        public void When(ProductNameChanged e)
-        {
-            this.Name = e.Name;
-        }
+        public void When(ProductNameChanged e) => Name = e.Name;
 
-        public void When(ProductPriceChanged e)
-        {
-            this.Price = e.Price;
-        }
+        public void When(ProductPriceChanged e) => Price = e.Price;
     }
 
     public class ProductDefined : DomainEvent
     {
-        public string Description { get; private set; }
-        public string Name { get; private set; }
-        public long Price { get; private set; }
+        public string Description { get; }
+        public string Name { get; }
+        public long Price { get; }
 
         public ProductDefined(string name, string description, long price)
-            : base()
         {
-            this.Name = name;
-            this.Description = description;
-            this.Price = price;
+            Name = name;
+            Description = description;
+            Price = price;
         }
 
         public override bool Equals(object other)
@@ -178,29 +153,22 @@ namespace VaughnVernon.Mockroservices.Tests
                 return false;
             }
 
-            ProductDefined otherProductDefined = (ProductDefined)other;
+            var otherProductDefined = (ProductDefined)other;
 
-            return this.Name.Equals(otherProductDefined.Name) &&
-                this.Description.Equals(otherProductDefined.Description) &&
-                this.Price == otherProductDefined.Price &&
-                this.EventVersion == otherProductDefined.EventVersion;
+            return Name.Equals(otherProductDefined.Name) &&
+                Description.Equals(otherProductDefined.Description) &&
+                Price == otherProductDefined.Price &&
+                Version == otherProductDefined.Version;
         }
 
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode() + Description.GetHashCode() + (int)Price;
-        }
+        public override int GetHashCode() => Name.GetHashCode() + Description.GetHashCode() + (int)Price;
     }
 
     public class ProductDescriptionChanged : DomainEvent
     {
-        public string Description { get; private set; }
+        public string Description { get; }
 
-        public ProductDescriptionChanged(string description)
-            : base()
-        {
-            this.Description = description;
-        }
+        public ProductDescriptionChanged(string description) => Description = description;
 
         public override bool Equals(object other)
         {
@@ -209,27 +177,20 @@ namespace VaughnVernon.Mockroservices.Tests
                 return false;
             }
 
-            ProductDescriptionChanged otherProductDescriptionChanged = (ProductDescriptionChanged)other;
+            var otherProductDescriptionChanged = (ProductDescriptionChanged)other;
 
-            return this.Description.Equals(otherProductDescriptionChanged.Description) &&
-                this.EventVersion == otherProductDescriptionChanged.EventVersion;
+            return Description.Equals(otherProductDescriptionChanged.Description) &&
+                Version == otherProductDescriptionChanged.Version;
         }
 
-        public override int GetHashCode()
-        {
-            return Description.GetHashCode();
-        }
+        public override int GetHashCode() => Description.GetHashCode();
     }
 
     public class ProductNameChanged : DomainEvent
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
-        public ProductNameChanged(string name)
-            : base()
-        {
-            this.Name = name;
-        }
+        public ProductNameChanged(string name) => Name = name;
 
         public override bool Equals(object other)
         {
@@ -238,27 +199,21 @@ namespace VaughnVernon.Mockroservices.Tests
                 return false;
             }
 
-            ProductNameChanged otherProductNameChanged = (ProductNameChanged)other;
+            var otherProductNameChanged = (ProductNameChanged)other;
 
-            return this.Name.Equals(otherProductNameChanged.Name) &&
-                this.EventVersion == otherProductNameChanged.EventVersion;
+            return Name.Equals(otherProductNameChanged.Name) &&
+                Version == otherProductNameChanged.Version;
         }
 
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
+        public override int GetHashCode() => Name.GetHashCode();
     }
 
     public class ProductPriceChanged : DomainEvent
     {
-        public long Price { get; private set; }
+        public long Price { get; }
 
-        public ProductPriceChanged(long price)
-            : base()
-        {
-            this.Price = price;
-        }
+        public ProductPriceChanged(long price) =>
+            Price = price;
 
         public override bool Equals(object other)
         {
@@ -267,15 +222,12 @@ namespace VaughnVernon.Mockroservices.Tests
                 return false;
             }
 
-            ProductPriceChanged otherProductPriceChanged = (ProductPriceChanged)other;
+            var otherProductPriceChanged = (ProductPriceChanged)other;
 
-            return this.Price == otherProductPriceChanged.Price &&
-                this.EventVersion == otherProductPriceChanged.EventVersion;
+            return Price == otherProductPriceChanged.Price &&
+                Version == otherProductPriceChanged.Version;
         }
 
-        public override int GetHashCode()
-        {
-            return (int)Price;
-        }
+        public override int GetHashCode() => (int)Price;
     }
 }
