@@ -21,12 +21,9 @@ namespace VaughnVernon.Mockroservices
 {
     public abstract class InformationExchangeReader
     {
-        public InformationExchangeReader(string representation)
-        {
-            this.Representation = Parse(representation);
-        }
+        public InformationExchangeReader(string representation) => Representation = Parse(representation);
 
-        protected dynamic Parse(string representation)
+        protected dynamic? Parse(string representation)
         {
             return JsonConvert.DeserializeObject(representation, new JsonSerializerSettings
             {
@@ -34,25 +31,16 @@ namespace VaughnVernon.Mockroservices
             });
         }
 
-        protected dynamic Representation { get; private set; }
+        protected dynamic? Representation { get; }
 
-        public long LongValue(string key)
-        {
-            return Representation[key];
-        }
+        public long LongValue(string key) => Representation?[key];
 
-        protected string StringValue(string key)
-        {
-            return Representation[key];
-        }
+        protected string? StringValue(string key) => Representation?[key];
     }
 
     public class MessageExchangeReader : InformationExchangeReader
     {
-        public static MessageExchangeReader From(Message message)
-        {
-            return new MessageExchangeReader(message);
-        }
+        public static MessageExchangeReader From(Message message) => new MessageExchangeReader(message);
 
         public MessageExchangeReader(Message message)
             : base(message.Payload)
@@ -64,79 +52,49 @@ namespace VaughnVernon.Mockroservices
             Message = message;
         }
 
-        public string Id
-        {
-            get
-            {
-                return Message.Id;
-            }
-        }
+        public string Id => Message.Id;
 
-        public long IdAsLong
-        {
-            get
-            {
-                return long.Parse(Message.Id);
-            }
-        }
+        public long IdAsLong => long.Parse(Message.Id);
 
-        public string Type
-        {
-            get
-            {
-                return Message.Type;
-            }
-        }
+        public string Type => Message.Type;
 
         public bool PayloadBooleanValue(string key)
         {
-            string stringValue = PayloadStringValue(key);
+            var stringValue = PayloadStringValue(key);
             return stringValue == null ? false : Convert.ToBoolean(stringValue);
         }
 
         public DateTime PayloadDateTimeValue(string key)
         {
-            long longValue = PayloadLongValue(key);
+            var longValue = PayloadLongValue(key);
             return new DateTime(longValue);
         }
 
-        public double PayloadDoubleValue(string key)
-        {
-            return DynamicPayload[key];
-        }
+        public double PayloadDoubleValue(string key) => DynamicPayload?[key];
 
-        public int PayloadIntegerValue(string key)
-        {
-            return DynamicPayload[key];
-        }
+        public int PayloadIntegerValue(string key) => DynamicPayload?[key];
 
-        public long PayloadLongValue(string key)
-        {
-            return DynamicPayload[key];
-        }
+        public long PayloadLongValue(string key) => DynamicPayload?[key];
 
-        public string PayloadStringValue(string key)
-        {
-            return DynamicPayload[key];
-        }
+        public string? PayloadStringValue(string key) => DynamicPayload?[key];
 
         public string[] PayloadStringArrayValue(string key)
         {
-            if (!(DynamicPayload[key] is JArray serializedArray) || serializedArray.Count == 0)
+            if (!(DynamicPayload?[key] is JArray serializedArray) || serializedArray.Count == 0)
             {
                 return new string[0];
             }
 
-            string[] result = new string[serializedArray.Count];
+            var result = new string[serializedArray.Count];
 
-            for (int i = 0; i < serializedArray.Count; i++)
+            for (var i = 0; i < serializedArray.Count; i++)
             {
                 result[i] = serializedArray[i].Value<string>();
             }
             return result;
         }
 
-        protected dynamic DynamicPayload { get; private set; }
-        protected Message Message { get; private set; }
+        protected dynamic? DynamicPayload { get; }
+        protected Message Message { get; }
     }
 }
