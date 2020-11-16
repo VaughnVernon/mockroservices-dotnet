@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VaughnVernon.Mockroservices
 {
@@ -34,10 +35,11 @@ namespace VaughnVernon.Mockroservices
             return batch;
         }
 
-        protected List<T> ToSourceStream<T>(List<EntryValue> stream)
+        protected List<T> ToSourceStream<T>(IEnumerable<EntryValue> stream)
         {
-            var sourceStream = new List<T>(stream.Count);
-            foreach (var value in stream)
+            var entryValues = stream.ToList();
+            var sourceStream = new List<T>(entryValues.Count);
+            foreach (var value in entryValues)
             {
                 var sourceType = Type.GetType(value.Type);
                 if (sourceType != null)

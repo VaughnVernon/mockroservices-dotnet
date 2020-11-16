@@ -13,6 +13,7 @@
 //   limitations under the License.
 
 using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace VaughnVernon.Mockroservices.Tests
@@ -91,16 +92,18 @@ namespace VaughnVernon.Mockroservices.Tests
 
             var eventStream123 = streamReader.StreamFor("name123");
             Assert.AreEqual(3, eventStream123.StreamVersion);
-            Assert.AreEqual(3, eventStream123.Stream.Count);
-            Assert.AreEqual(new EntryValue("name123", 1, "type1", "type1_instance1", ""), eventStream123.Stream[0]);
-            Assert.AreEqual(new EntryValue("name123", 2, "type1-1", "type1-1_instance1", ""), eventStream123.Stream[1]);
-            Assert.AreEqual(new EntryValue("name123", 3, "type1-2", "type1-2_instance1", ""), eventStream123.Stream[2]);
+            var eventStream123Stream = eventStream123.Stream.ToList();
+            Assert.AreEqual(3, eventStream123Stream.Count);
+            Assert.AreEqual(new EntryValue("name123", 1, "type1", "type1_instance1", ""), eventStream123Stream[0]);
+            Assert.AreEqual(new EntryValue("name123", 2, "type1-1", "type1-1_instance1", ""), eventStream123Stream[1]);
+            Assert.AreEqual(new EntryValue("name123", 3, "type1-2", "type1-2_instance1", ""), eventStream123Stream[2]);
 
             var eventStream456 = streamReader.StreamFor("name456");
             Assert.AreEqual(2, eventStream456.StreamVersion);
-            Assert.AreEqual(2, eventStream456.Stream.Count);
-            Assert.AreEqual(new EntryValue("name456", 1, "type2", "type2_instance1", ""), eventStream456.Stream[0]);
-            Assert.AreEqual(new EntryValue("name456", 2, "type2-1", "type2-1_instance1", ""), eventStream456.Stream[1]);
+            var eventStream456Stream = eventStream456.Stream.ToList();
+            Assert.AreEqual(2, eventStream456Stream.Count);
+            Assert.AreEqual(new EntryValue("name456", 1, "type2", "type2_instance1", ""), eventStream456Stream[0]);
+            Assert.AreEqual(new EntryValue("name456", 2, "type2-1", "type2-1_instance1", ""), eventStream456Stream[1]);
 
             journal.Close();
         }
@@ -120,13 +123,13 @@ namespace VaughnVernon.Mockroservices.Tests
             var eventStream123 = streamReader.StreamFor("name123");
             Assert.AreEqual("name123", eventStream123.StreamName);
             Assert.AreEqual(3, eventStream123.StreamVersion);
-            Assert.AreEqual(1, eventStream123.Stream.Count);
+            Assert.AreEqual(1, eventStream123.Stream.Count());
             Assert.AreEqual("SNAPSHOT123-2", eventStream123.Snapshot);
 
             var eventStream456 = streamReader.StreamFor("name456");
             Assert.AreEqual("name456", eventStream456.StreamName);
             Assert.AreEqual(2, eventStream456.StreamVersion);
-            Assert.AreEqual(0, eventStream456.Stream.Count);
+            Assert.AreEqual(0, eventStream456.Stream.Count());
             Assert.AreEqual("SNAPSHOT456-2", eventStream456.Snapshot);
 
             journal.Close();

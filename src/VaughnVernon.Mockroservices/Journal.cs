@@ -255,7 +255,7 @@ namespace VaughnVernon.Mockroservices
                 return new StoredSource(readSequence, journal.EntryValueAt(readSequence));
             }
 
-            return new StoredSource(StoredSource.NO_ID, new EntryValue("", EntryValue.NO_STREAM_VERSION, "", "", ""));
+            return new StoredSource(StoredSource.NoId, new EntryValue("", EntryValue.NoStreamVersion, "", "", ""));
         }
 
         public void Reset() => readSequence = 0;
@@ -271,13 +271,13 @@ namespace VaughnVernon.Mockroservices
     public class EntryStream
     {
         public string Snapshot { get; }
-        public List<EntryValue> Stream { get; }
+        public IEnumerable<EntryValue> Stream { get; }
         public string StreamName { get; }
         public int StreamVersion { get; }
 
         public bool HasSnapshot() => Snapshot.Length > 0;
 
-        internal EntryStream(string streamName, int streamVersion, List<EntryValue> stream, string snapshot)
+        internal EntryStream(string streamName, int streamVersion, IEnumerable<EntryValue> stream, string snapshot)
         {
             StreamName = streamName;
             StreamVersion = streamVersion;
@@ -299,7 +299,7 @@ namespace VaughnVernon.Mockroservices
 
     public class EntryValue
     {
-        public static int NO_STREAM_VERSION = -1;
+        public const int NoStreamVersion = -1;
 
         public string Body { get; }
         public string Snapshot { get; }
@@ -347,12 +347,12 @@ namespace VaughnVernon.Mockroservices
 
     public class StoredSource
     {
-        public static long NO_ID = -1L;
+        public const long NoId = -1L;
 
         public EntryValue EntryValue { get; }
         public long Id { get; }
 
-        public bool IsValid() => Id != NO_ID;
+        public bool IsValid() => Id != NoId;
 
         public override int GetHashCode() => EntryValue.GetHashCode() + (int)Id;
 
@@ -378,8 +378,10 @@ namespace VaughnVernon.Mockroservices
     }
 
 	public class EntryBatch
-	{
-		public List<Entry> Entries { get; }
+    {
+        private readonly List<Entry> entries;
+
+        public IEnumerable<Entry> Entries => entries;
 
 		public static EntryBatch Of(string type, string body) => new EntryBatch(type, body);
 
@@ -390,10 +392,10 @@ namespace VaughnVernon.Mockroservices
 		{
 		}
 
-		public EntryBatch(int entries) => Entries = new List<Entry>(entries);
+		public EntryBatch(int entries) => this.entries = new List<Entry>(entries);
 
         public EntryBatch(string type, string body)
-			: this(type, body, "")
+			: this(type, body, string.Empty)
 		{
 		}
 
@@ -401,9 +403,9 @@ namespace VaughnVernon.Mockroservices
 			: this() =>
             AddEntry(type, body, snapshot);
 
-        public void AddEntry(string type, string body) => Entries.Add(new Entry(type, body));
+        public void AddEntry(string type, string body) => entries.Add(new Entry(type, body));
 
-        public void AddEntry(string type, string body, string snapshot) => Entries.Add(new Entry(type, body, snapshot));
+        public void AddEntry(string type, string body, string snapshot) => entries.Add(new Entry(type, body, snapshot));
 
         public class Entry
 		{
