@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VaughnVernon.Mockroservices
 {
@@ -27,23 +28,11 @@ namespace VaughnVernon.Mockroservices
 
 		public static DomainEvent Null = new NullDomainEvent();
 
-		public static List<DomainEvent> All(params DomainEvent[] domainEvents) => All(new List<DomainEvent>(domainEvents));
+		public static IEnumerable<DomainEvent> All(params DomainEvent[] domainEvents) => All(domainEvents.AsEnumerable());
 
-		public static List<DomainEvent> All(List<DomainEvent> domainEvents)
-		{
-			var all = new List<DomainEvent>(domainEvents.Count);
+		public static IEnumerable<DomainEvent> All(IEnumerable<DomainEvent> domainEvents) => domainEvents.Where(e => !e.IsNull());
 
-			foreach (var domainEvent in domainEvents)
-			{
-				if (!domainEvent.IsNull())
-				{
-					all.Add(domainEvent);
-				}
-			}
-			return all;
-		}
-
-		public static List<DomainEvent> None() => new List<DomainEvent>(0);
+		public static IEnumerable<DomainEvent> None() => Enumerable.Empty<DomainEvent>();
 
 		public virtual bool IsNull() => false;
 
@@ -52,11 +41,8 @@ namespace VaughnVernon.Mockroservices
 		{
 		}
 
-		protected DomainEvent(int version)
+		protected DomainEvent(int version) : this(DateTimeOffset.Now, version)
 		{
-			OccurredOn = DateTimeOffset.Now;
-			ValidOn = DateTimeOffset.Now;
-			Version = version;
 		}
 		
 		protected DomainEvent(DateTimeOffset validOn, int version)

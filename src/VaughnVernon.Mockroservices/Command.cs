@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VaughnVernon.Mockroservices
 {
@@ -27,23 +28,11 @@ namespace VaughnVernon.Mockroservices
 
 		public static Command Null = new NullCommand();
 
-		public static List<Command> All(params Command[] commands) => All(new List<Command>(commands));
+		public static IEnumerable<Command> All(params Command[] commands) => All(commands.AsEnumerable());
 
-		public static List<Command> All(List<Command> commands)
-		{
-			var all = new List<Command>(commands.Count);
+		public static IEnumerable<Command> All(IEnumerable<Command> commands) => commands.Where(c => !c.IsNull());
 
-			foreach (var command in commands)
-			{
-				if (!command.IsNull())
-				{
-					all.Add(command);
-				}
-			}
-			return all;
-		}
-
-		public static List<Command> None() => new List<Command>(0);
+		public static IEnumerable<Command> None() => Enumerable.Empty<Command>();
 
 		public virtual bool IsNull() => false;
 
