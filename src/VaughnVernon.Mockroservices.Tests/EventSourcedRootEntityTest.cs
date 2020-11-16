@@ -24,18 +24,18 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestProductDefinedEventKept()
         {
-            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999);
             Assert.AreEqual(1, product.Applied.Count);
             Assert.AreEqual("dice-fuz-1", product.Name);
             Assert.AreEqual("Fuzzy dice.", product.Description);
             Assert.AreEqual(999, product.Price);
-            Assert.AreEqual(new ProductDefined("dice-fuz-1", "Fuzzy dice.", 999), product.Applied[0]);
+            Assert.AreEqual(new ProductDefined(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999), product.Applied[0]);
         }
 
         [TestMethod]
         public void TestProductNameChangedEventKept()
         {
-            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999);
 
             product.Applied.Clear();
 
@@ -48,7 +48,7 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestProductDescriptionChangedEventsKept()
         {
-            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999);
 
             product.Applied.Clear();
 
@@ -61,7 +61,7 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestProductPriceChangedEventKept()
         {
-            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999);
 
             product.Applied.Clear();
 
@@ -74,7 +74,7 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestReconstitution()
         {
-            var product = new Product("dice-fuz-1", "Fuzzy dice.", 999);
+            var product = new Product(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999);
             product.ChangeName("dice-fuzzy-1");
             product.ChangeDescription("Fuzzy dice, and all.");
             product.ChangePrice(995);
@@ -86,11 +86,13 @@ namespace VaughnVernon.Mockroservices.Tests
 
     public class Product : SourcedEntity<DomainEvent>
     {
+        public string Id { get; private set; } 
         public string Name { get; private set; }
         public string Description { get; private set; }
         public long Price { get; private set; }
 
-        public Product(string name, string description, long price) => Apply(new ProductDefined(name, description, price));
+        public Product(string id, string name, string description, long price)
+            => Apply(new ProductDefined(id, name, description, price));
 
         public Product(List<DomainEvent> eventStream, int streamVersion)
             : base(eventStream, streamVersion)
@@ -103,7 +105,7 @@ namespace VaughnVernon.Mockroservices.Tests
 
         public void ChangePrice(long price) => Apply(new ProductPriceChanged(price));
 
-        public override bool Equals(Object other)
+        public override bool Equals(object other)
         {
             if (other == null || other.GetType() != typeof(Product))
             {
@@ -117,10 +119,11 @@ namespace VaughnVernon.Mockroservices.Tests
                 Price == otherProduct.Price;
         }
 
-        public override int GetHashCode() => Name.GetHashCode();
+        public override int GetHashCode() => Id.GetHashCode() + Name.GetHashCode();
 
         public void When(ProductDefined e)
         {
+            Id = e.Id;
             Name = e.Name;
             Description = e.Description;
             Price = e.Price;
@@ -135,12 +138,14 @@ namespace VaughnVernon.Mockroservices.Tests
 
     public class ProductDefined : DomainEvent
     {
+        public string Id { get; }
         public string Description { get; }
         public string Name { get; }
         public long Price { get; }
 
-        public ProductDefined(string name, string description, long price)
+        public ProductDefined(string id, string name, string description, long price)
         {
+            Id = id;
             Name = name;
             Description = description;
             Price = price;
@@ -155,13 +160,14 @@ namespace VaughnVernon.Mockroservices.Tests
 
             var otherProductDefined = (ProductDefined)other;
 
-            return Name.Equals(otherProductDefined.Name) &&
+            return Id.Equals(otherProductDefined.Id) &&
+                Name.Equals(otherProductDefined.Name) &&
                 Description.Equals(otherProductDefined.Description) &&
                 Price == otherProductDefined.Price &&
                 Version == otherProductDefined.Version;
         }
 
-        public override int GetHashCode() => Name.GetHashCode() + Description.GetHashCode() + (int)Price;
+        public override int GetHashCode() => Id.GetHashCode() + Name.GetHashCode() + Description.GetHashCode() + (int)Price;
     }
 
     public class ProductDescriptionChanged : DomainEvent
