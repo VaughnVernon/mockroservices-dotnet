@@ -34,7 +34,7 @@ namespace VaughnVernon.Mockroservices
                     return MessageBuses[name];
                 }
 
-                MessageBus messageBus = new MessageBus(name);
+                var messageBus = new MessageBus(name);
                 MessageBuses.Add(name, messageBus);
 
                 return messageBus;
