@@ -30,10 +30,10 @@ namespace VaughnVernon.Mockroservices
         protected SourcedEntity()
         {
             applied = new List<TSource>();
-            currentVersion = 0;
+            currentVersion = EntryValue.NoStreamVersion;
         }
 
-        protected SourcedEntity(List<TSource> stream, int streamVersion)
+        protected SourcedEntity(IEnumerable<TSource> stream, int streamVersion)
             : this()
         {
             foreach (var source in stream)

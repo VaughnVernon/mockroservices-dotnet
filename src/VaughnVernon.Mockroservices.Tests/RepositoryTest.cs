@@ -76,9 +76,9 @@ namespace VaughnVernon.Mockroservices.Tests
             return new PersonES(ToSourceStream<DomainEvent>(stream.Stream), stream.StreamVersion);
         }
 
-        public void Save(PersonES person) => journal.Write(person.Id, person.NextVersion, ToBatch(person.Applied));
+        public void Save(PersonES person) => journal.Write(person.Id, person.CurrentVersion, ToBatch(person.Applied));
 
-        public void Save<T>(T person) where T : PersonES => journal.Write<T>(person.Id, person.NextVersion, ToBatch(person.Applied));
+        public void Save<T>(T person) where T : PersonES => journal.Write<T>(person.Id, person.CurrentVersion, ToBatch(person.Applied));
 
         internal PersonRepository()
         {

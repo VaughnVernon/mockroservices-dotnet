@@ -38,14 +38,14 @@ namespace VaughnVernon.Mockroservices.Tests
             {
 				batch1.AddEntry("test1type", $"test1instance{idx}");
             }
-			eventJournal.Write("test1", 0, batch1);
+			eventJournal.Write("test1", EntryValue.NoStreamVersion, batch1);
 
 			var batch2 = new EntryBatch();
 			for (var idx = 0; idx < 3; ++idx)
             {
 				batch2.AddEntry("test2type", $"test2instance{idx}");
             }
-			eventJournal.Write("test2", 0, batch2);
+			eventJournal.Write("test2", EntryValue.NoStreamVersion, batch2);
 
 			subscriber.WaitForExpectedMessages(6);
 

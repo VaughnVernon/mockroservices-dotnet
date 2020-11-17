@@ -15,6 +15,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace VaughnVernon.Mockroservices
@@ -72,10 +73,17 @@ namespace VaughnVernon.Mockroservices
         {
             lock (((ICollection)store).SyncRoot)
             {
+                if (!TryCanWrite(string.Empty, EntryValue.NoStreamVersion, out var currentVersion))
+                {
+                    throw new IndexOutOfRangeException($"Cannot write to stream '{string.Empty}' with expected version {EntryValue.NoStreamVersion} because the current version is {currentVersion}");   
+                }
+                
+                var offset = 1;
 				foreach (var entry in batch.Entries)
 				{
-					store.Add(new EntryValue("", 0, entry.Type, entry.Body, ""));
-				}
+                    store.Add(new EntryValue(string.Empty, 0  + offset, entry.Type, entry.Body, string.Empty));
+                    offset++;
+                }
 			}
 		}
 
@@ -83,9 +91,16 @@ namespace VaughnVernon.Mockroservices
         {
             lock (((ICollection)store).SyncRoot)
             {
+                if (!TryCanWrite(streamName, streamVersion, out var currentVersion))
+                {
+                    throw new IndexOutOfRangeException($"Cannot write to stream '{streamName}' with expected version {streamVersion} because the current version is {currentVersion}");   
+                }
+                
+                var offset = 1;
                 foreach (var entry in batch.Entries)
                 {
-                    store.Add(new EntryValue(StreamNameBuilder.BuildStreamNameFor<T>(streamName), streamVersion, entry.Type, entry.Body, entry.Snapshot));
+                    store.Add(new EntryValue(StreamNameBuilder.BuildStreamNameFor<T>(streamName), streamVersion + offset, entry.Type, entry.Body, entry.Snapshot));
+                    offset++;
                 }
             }
         }
@@ -94,10 +109,17 @@ namespace VaughnVernon.Mockroservices
         {
             lock (((ICollection)store).SyncRoot)
             {
+                if (!TryCanWrite(streamName, streamVersion, out var currentVersion))
+                {
+                    throw new IndexOutOfRangeException($"Cannot write to stream '{streamName}' with expected version {streamVersion} because the current version is {currentVersion}");   
+                }
+
+                var offset = 1;
 				foreach (var entry in batch.Entries)
 				{
-					store.Add(new EntryValue(streamName, streamVersion, entry.Type, entry.Body, entry.Snapshot));
-				}
+					store.Add(new EntryValue(streamName, streamVersion + offset, entry.Type, entry.Body, entry.Snapshot));
+                    offset++;
+                }
 			}
 		}
 
@@ -158,6 +180,25 @@ namespace VaughnVernon.Mockroservices
 
                 return new EntryStream(streamName, streamVersion, values, latestSnapshotValue == null ? "" : latestSnapshotValue.Snapshot);
             }
+        }
+        
+        private bool TryCanWrite(string streamName, int expectedStreamVersion, out int currentVersion)
+        {
+            var lastEntry = store.LastOrDefault(e => e.StreamName == streamName);
+            if (lastEntry != null)
+            {
+                currentVersion = expectedStreamVersion;
+                return lastEntry.StreamVersion == expectedStreamVersion;
+            }
+
+            if (expectedStreamVersion == EntryValue.NoStreamVersion)
+            {
+                currentVersion = EntryValue.NoStreamVersion;
+                return true;
+            }
+
+            currentVersion = EntryValue.NoStreamVersion;
+            return false;
         }
     }
 
@@ -255,7 +296,7 @@ namespace VaughnVernon.Mockroservices
                 return new StoredSource(readSequence, journal.EntryValueAt(readSequence));
             }
 
-            return new StoredSource(StoredSource.NoId, new EntryValue("", EntryValue.NoStreamVersion, "", "", ""));
+            return new StoredSource(StoredSource.NoId, new EntryValue(string.Empty, EntryValue.NoStreamVersion, string.Empty, string.Empty, string.Empty));
         }
 
         public void Reset() => readSequence = 0;

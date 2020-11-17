@@ -24,12 +24,13 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestProductDefinedEventKept()
         {
-            var product = new Product(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999);
+            var id = Guid.NewGuid().ToString();
+            var product = new Product(id, "dice-fuz-1", "Fuzzy dice.", 999);
             Assert.AreEqual(1, product.Applied.Count);
             Assert.AreEqual("dice-fuz-1", product.Name);
             Assert.AreEqual("Fuzzy dice.", product.Description);
             Assert.AreEqual(999, product.Price);
-            Assert.AreEqual(new ProductDefined(Guid.NewGuid().ToString(), "dice-fuz-1", "Fuzzy dice.", 999), product.Applied[0]);
+            Assert.AreEqual(new ProductDefined(id, "dice-fuz-1", "Fuzzy dice.", 999), product.Applied[0]);
         }
 
         [TestMethod]

@@ -20,10 +20,11 @@ namespace VaughnVernon.Mockroservices
 {
     public abstract class Repository
     {
-        protected EntryBatch ToBatch<T>(List<T> sources)
+        protected EntryBatch ToBatch<T>(IEnumerable<T> sources)
         {
-            var batch = new EntryBatch(sources.Count);
-            foreach (var source in sources)
+            var localSources = sources.ToList();
+            var batch = new EntryBatch(localSources.Count);
+            foreach (var source in localSources)
             {
                 var eventBody = Serialization.Serialize(source);
                 var assemblyQualifiedName = source?.GetType().AssemblyQualifiedName;
