@@ -70,7 +70,7 @@ namespace VaughnVernon.Mockroservices.Tests
 	        var journal = Journal.Open("test");
 	        var person = new Person("John", DateTime.Now.AddYears(-40));
 	        var personEntry = Serialization.Serialize(person);
-	        journal.Write<Person>("123", 1, new EntryBatch(person.GetType().AssemblyQualifiedName, personEntry));
+	        journal.Write<Person>("123", 1, new EntryBatch(person.GetType().AssemblyQualifiedName!, personEntry));
 	        var reader = journal.StreamReader();
 	        var entryStream = reader.StreamFor<Person>("123");
 			Assert.AreEqual("Person_123", entryStream.StreamName);
@@ -133,6 +133,31 @@ namespace VaughnVernon.Mockroservices.Tests
             Assert.AreEqual("SNAPSHOT456-2", eventStream456.Snapshot);
 
             journal.Close();
+        }
+        
+        [TestMethod]
+        public void TestWriteReadStreamCategory()
+        {
+	        var journal = Journal.Open("test");
+	        journal.Write("name123", EntryValue.NoStreamVersion, EntryBatch.Of("type1", "type1_instance1"));
+	        journal.Write("name456", EntryValue.NoStreamVersion, EntryBatch.Of("type2", "type2_instance1"));
+	        journal.Write("name123", 1, EntryBatch.Of("type1-1", "type1-1_instance1"));
+	        journal.Write("name123", 2, EntryBatch.Of("type1-2", "type1-2_instance1"));
+	        journal.Write("name456", 1, EntryBatch.Of("type2-1", "type2-1_instance1"));
+
+	        var streamReader = journal.StreamReader();
+
+	        var categoryEntryStream = streamReader.StreamFor("cat-name");
+	        Assert.AreEqual(4, categoryEntryStream.StreamVersion);
+	        var categoryStream = categoryEntryStream.Stream.ToList();
+	        Assert.AreEqual(5, categoryStream.Count);
+	        Assert.AreEqual(new EntryValue("name123", 0, "type1", "type1_instance1", ""), categoryStream[0]);
+	        Assert.AreEqual(new EntryValue("name456", 1, "type2", "type2_instance1", ""), categoryStream[1]);
+	        Assert.AreEqual(new EntryValue("name123", 2, "type1-1", "type1-1_instance1", ""), categoryStream[2]);
+	        Assert.AreEqual(new EntryValue("name123", 3, "type1-2", "type1-2_instance1", ""), categoryStream[3]);
+	        Assert.AreEqual(new EntryValue("name456", 4, "type2-1", "type2-1_instance1", ""), categoryStream[4]);
+
+	        journal.Close();
         }
     }
 }
