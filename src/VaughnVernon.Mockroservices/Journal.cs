@@ -159,9 +159,10 @@ namespace VaughnVernon.Mockroservices
                 var storeCopy = new List<EntryValue>(store);
                 EntryValue? latestSnapshotValue = null;
 
+                var globalIndex = 0;
                 foreach (var value in storeCopy)
                 {
-                    if (value.StreamName.Equals(streamName))
+                    if (CanRead(value, streamName))
                     {
                         if (value.HasSnapshot())
                         {
@@ -170,15 +171,17 @@ namespace VaughnVernon.Mockroservices
                         }
                         else
                         {
-                            values.Add(value);
+                            values.Add(IsCategoryStream(streamName) ? value.WithStreamVersion(globalIndex) : value);
                         }
                     }
+
+                    globalIndex++;
                 }
 
-                var snapshotVersion = latestSnapshotValue == null ? 0 : latestSnapshotValue.StreamVersion;
+                var snapshotVersion = latestSnapshotValue?.StreamVersion ?? 0;
                 var streamVersion = values.Count == 0 ? snapshotVersion : values[values.Count - 1].StreamVersion;
 
-                return new EntryStream(streamName, streamVersion, values, latestSnapshotValue == null ? "" : latestSnapshotValue.Snapshot);
+                return new EntryStream(streamName, streamVersion, values, latestSnapshotValue == null ? string.Empty : latestSnapshotValue.Snapshot);
             }
         }
         
@@ -200,6 +203,19 @@ namespace VaughnVernon.Mockroservices
             currentVersion = EntryValue.NoStreamVersion;
             return false;
         }
+
+        private bool CanRead(EntryValue entryValue, string streamName)
+        {
+            if (IsCategoryStream(streamName))
+            {
+                var categoryStreamName = streamName.Split('-')[1];
+                return entryValue.StreamName.StartsWith(categoryStreamName);
+            }
+
+            return entryValue.StreamName.Equals(streamName);
+        }
+        
+        private bool IsCategoryStream(string streamName) => streamName.StartsWith("cat-");
     }
 
     public class JournalPublisher
@@ -384,6 +400,8 @@ namespace VaughnVernon.Mockroservices
             Body = body;
             Snapshot = snapshot;
         }
+
+        internal EntryValue WithStreamVersion(int streamVersion) => new EntryValue(StreamName, streamVersion, Type, Body, Snapshot);
     }
 
     public class StoredSource

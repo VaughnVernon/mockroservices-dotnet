@@ -136,7 +136,6 @@ namespace VaughnVernon.Mockroservices.Tests
         }
         
         [TestMethod]
-        [Ignore]
         public void TestWriteReadStreamCategory()
         {
 	        var journal = Journal.Open("test");
