@@ -24,5 +24,11 @@ namespace VaughnVernon.Mockroservices.Tests
         {
             Assert.AreEqual("Person_1234", StreamNameBuilder.BuildStreamNameFor<Person>("1234"));
         }
+        
+        [TestMethod]
+        public void TestThatStreamNameBuilderBuildsCorrectCategoryStream()
+        {
+            Assert.AreEqual("cat-person", StreamNameBuilder.BuildStreamNameFor<Person>());
+        }
     }
 }
