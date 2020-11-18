@@ -130,26 +130,38 @@ namespace VaughnVernon.Mockroservices
             store = new List<EntryValue>();
         }
 
-        internal EntryValue EntryValueAt(int id)
+        internal EntryValue EntryValueAt(int id, string streamName)
         {
             lock (((ICollection)store).SyncRoot)
             {
-                if (id >= store.Count)
+                if (id > GreatestId(streamName))
                 {
                     throw new InvalidOperationException($"The id does not exist: {id}");
                 }
 
-                return store[id];
+                var maybeCategoryStreamName = MaybeCategoryStreamName(streamName);
+                if (IsCategoryStream(streamName))
+                {
+                    return store.Where(e => e.StreamName.StartsWith(maybeCategoryStreamName)).ElementAt(id);
+                }
+
+                return store.Where(e => e.StreamName == maybeCategoryStreamName).ElementAt(id);
             }
         }
 
-        internal int GreatestId { get
+        internal int GreatestId(string streamName)
         {
             lock (((ICollection)store).SyncRoot)
             {
-                return store.Count - 1;
+                var maybeCategoryStreamName = MaybeCategoryStreamName(streamName);
+                if (IsCategoryStream(streamName))
+                {
+                    return store.Count(e => e.StreamName.StartsWith(maybeCategoryStreamName)) - 1;
+                }
+                
+                return store.Count(e => e.StreamName == maybeCategoryStreamName) - 1;
             }
-        } }
+        }
 
         internal EntryStream ReadStream(string streamName)
         {
@@ -206,13 +218,23 @@ namespace VaughnVernon.Mockroservices
 
         private bool CanRead(EntryValue entryValue, string streamName)
         {
+            var maybeCategoryStreamName = MaybeCategoryStreamName(streamName);
             if (IsCategoryStream(streamName))
             {
-                var categoryStreamName = streamName.Split('-')[1];
-                return entryValue.StreamName.StartsWith(categoryStreamName);
+                return entryValue.StreamName.StartsWith(maybeCategoryStreamName);
             }
 
-            return entryValue.StreamName.Equals(streamName);
+            return entryValue.StreamName.Equals(maybeCategoryStreamName);
+        }
+
+        private string MaybeCategoryStreamName(string streamName)
+        {
+            if (IsCategoryStream(streamName))
+            {
+                return streamName.Split('-')[1];
+            }
+
+            return streamName;
         }
         
         private bool IsCategoryStream(string streamName) => streamName.StartsWith("cat-");
@@ -238,7 +260,7 @@ namespace VaughnVernon.Mockroservices
             string messageBusName,
             string topicName)
         {
-            reader = Journal.Open(journalName).Reader($"topic-{topicName}-reader");
+            reader = Journal.Open(journalName).Reader(topicName);
             topic = MessageBus.Start(messageBusName).OpenTopic(topicName);
             dispatcherThread = new Thread(DispatchEach);
 
@@ -307,9 +329,9 @@ namespace VaughnVernon.Mockroservices
 
         public StoredSource ReadNext()
         {
-            if (readSequence <= journal.GreatestId)
+            if (readSequence <= journal.GreatestId(Name))
             {
-                return new StoredSource(readSequence, journal.EntryValueAt(readSequence));
+                return new StoredSource(readSequence, journal.EntryValueAt(readSequence, Name));
             }
 
             return new StoredSource(StoredSource.NoId, new EntryValue(string.Empty, EntryValue.NoStreamVersion, string.Empty, string.Empty, string.Empty));

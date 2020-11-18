@@ -54,7 +54,7 @@ namespace VaughnVernon.Mockroservices.Tests
             var journal = Journal.Open("test");
 			journal.Write("name123", EntryValue.NoStreamVersion, EntryBatch.Of("type1", "type1_instance1"));
 			journal.Write("name456", EntryValue.NoStreamVersion, EntryBatch.Of("type2", "type2_instance1"));
-			var reader = journal.Reader("test_reader");
+			var reader = journal.Reader("cat-name");
             Assert.AreEqual(new StoredSource(0, new EntryValue("name123", 0, "type1", "type1_instance1", "")), reader.ReadNext());
             reader.Acknowledge(0);
             Assert.AreEqual(new StoredSource(1, new EntryValue("name456", 0, "type2", "type2_instance1", "")), reader.ReadNext());
