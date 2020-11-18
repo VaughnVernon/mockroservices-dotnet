@@ -16,7 +16,7 @@ namespace VaughnVernon.Mockroservices
 {
     public static class StreamNameBuilder
     {
-        public static string BuildStreamNameFor<T>(string value) => $"{typeof(T).Name}_{value}";
+        public static string BuildStreamNameFor<T>(string value) => $"{typeof(T).Name.ToLowerInvariant()}_{value}";
         
         public static string BuildStreamNameFor<T>() => $"cat-{typeof(T).Name.ToLowerInvariant()}";
     }

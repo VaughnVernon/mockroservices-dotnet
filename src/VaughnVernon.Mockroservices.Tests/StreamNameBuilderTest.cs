@@ -22,7 +22,7 @@ namespace VaughnVernon.Mockroservices.Tests
         [TestMethod]
         public void TestThatStreamNameBuilderBuildsCorrectStream()
         {
-            Assert.AreEqual("Person_1234", StreamNameBuilder.BuildStreamNameFor<Person>("1234"));
+            Assert.AreEqual("person_1234", StreamNameBuilder.BuildStreamNameFor<Person>("1234"));
         }
         
         [TestMethod]

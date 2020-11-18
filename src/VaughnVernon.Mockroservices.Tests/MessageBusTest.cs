@@ -43,7 +43,7 @@ namespace VaughnVernon.Mockroservices.Tests
         public void TestTopicPubSub()
         {
             var messageBus = MessageBus.Start("test_bus2");
-            var topic = messageBus.OpenTopic("test_topic");
+            var topic = messageBus.OpenTopic("test_topic2");
             var subscriber = new MessageBusTestSubscriber();
             topic.Subscribe(subscriber);
             topic.Publish(new Message("1", "type1", "test1"));

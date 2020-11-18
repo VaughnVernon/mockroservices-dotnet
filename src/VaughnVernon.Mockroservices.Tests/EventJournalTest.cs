@@ -73,7 +73,7 @@ namespace VaughnVernon.Mockroservices.Tests
 	        journal.Write<Person>("123", EntryValue.NoStreamVersion, new EntryBatch(person.GetType().AssemblyQualifiedName!, personEntry));
 	        var reader = journal.StreamReader();
 	        var entryStream = reader.StreamFor<Person>("123");
-			Assert.AreEqual("Person_123", entryStream.StreamName);
+			Assert.AreEqual("person_123", entryStream.StreamName);
 			Assert.AreEqual(0, entryStream.StreamVersion);
 	        journal.Close();
         }
