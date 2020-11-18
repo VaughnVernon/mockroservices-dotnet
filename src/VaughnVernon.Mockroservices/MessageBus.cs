@@ -52,7 +52,7 @@ namespace VaughnVernon.Mockroservices
                     return topics[name];
                 }
 
-                Topic topic = new Topic(name);
+                var topic = new Topic(name);
                 topics.Add(name, topic);
 
                 return topic;
@@ -137,7 +137,7 @@ namespace VaughnVernon.Mockroservices
                     {
                         if (queue.TryDequeue(out Message message))
                         {
-                            foreach (ISubscriber subscriber in subscribers)
+                            foreach (var subscriber in subscribers)
                             {
                                 try
                                 {
@@ -145,7 +145,7 @@ namespace VaughnVernon.Mockroservices
                                 }
                                 catch (Exception e)
                                 {
-                                    Console.WriteLine("Error dispatching message to handler: " + e.Message);
+                                    Console.WriteLine($"Error dispatching message to handler: {e.Message}");
                                     Console.WriteLine(e.ToString());
                                 }
                             }
