@@ -74,7 +74,7 @@ namespace VaughnVernon.Mockroservices.Tests
         [JsonConstructor]
         public PersonES(string name, int age, DateTime birthDate) => Apply(new PersonNamed(Guid.NewGuid().ToString(), name, age, birthDate));
 
-        public PersonES(List<DomainEvent> stream, int streamVersion)
+        public PersonES(IEnumerable<DomainEvent> stream, int streamVersion)
             : base(stream, streamVersion)
         {
         }

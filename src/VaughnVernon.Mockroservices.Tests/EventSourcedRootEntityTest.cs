@@ -15,6 +15,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace VaughnVernon.Mockroservices.Tests
 {
@@ -94,17 +95,26 @@ namespace VaughnVernon.Mockroservices.Tests
 
         public Product(string id, string name, string description, long price)
             => Apply(new ProductDefined(id, name, description, price));
+        
+        public Product(string id, string name, string description, long price, DateTimeOffset validOn)
+            => Apply(new ProductDefined(id, name, description, price, validOn));
 
-        public Product(List<DomainEvent> eventStream, int streamVersion)
+        public Product(IEnumerable<DomainEvent> eventStream, int streamVersion)
             : base(eventStream, streamVersion)
         {
         }
 
         public void ChangeDescription(string description) => Apply(new ProductDescriptionChanged(description));
+        
+        public void ChangeDescription(string description, DateTimeOffset validOn) => Apply(new ProductDescriptionChanged(description, validOn));
 
         public void ChangeName(string name) => Apply(new ProductNameChanged(name));
+        
+        public void ChangeName(string name, DateTimeOffset validOn) => Apply(new ProductNameChanged(name, validOn));
 
         public void ChangePrice(long price) => Apply(new ProductPriceChanged(price));
+        
+        public void ChangePrice(long price, DateTimeOffset validOn) => Apply(new ProductPriceChanged(price, validOn));
 
         public override bool Equals(object other)
         {
@@ -145,6 +155,13 @@ namespace VaughnVernon.Mockroservices.Tests
         public long Price { get; }
 
         public ProductDefined(string id, string name, string description, long price)
+            : this(id, name, description, price, DateTimeOffset.Now)
+        {
+        }
+
+        [JsonConstructor]
+        public ProductDefined(string id, string name, string description, long price, DateTimeOffset validOn)
+            : base(validOn, 0)
         {
             Id = id;
             Name = name;
@@ -175,7 +192,13 @@ namespace VaughnVernon.Mockroservices.Tests
     {
         public string Description { get; }
 
-        public ProductDescriptionChanged(string description) => Description = description;
+        public ProductDescriptionChanged(string description) : this(description, DateTimeOffset.Now)
+        {
+        }
+        
+        [JsonConstructor]
+        public ProductDescriptionChanged(string description, DateTimeOffset validOn) : base (validOn, 0)
+            => Description = description;
 
         public override bool Equals(object other)
         {
@@ -197,7 +220,13 @@ namespace VaughnVernon.Mockroservices.Tests
     {
         public string Name { get; }
 
-        public ProductNameChanged(string name) => Name = name;
+        public ProductNameChanged(string name) : this(name, DateTimeOffset.Now)
+        {
+        }
+        
+        [JsonConstructor]
+        public ProductNameChanged(string name, DateTimeOffset validOn) : base(validOn, 0)
+            => Name = name;
 
         public override bool Equals(object other)
         {
@@ -219,8 +248,13 @@ namespace VaughnVernon.Mockroservices.Tests
     {
         public long Price { get; }
 
-        public ProductPriceChanged(long price) =>
-            Price = price;
+        public ProductPriceChanged(long price) : this(price, DateTimeOffset.Now)
+        {
+        }
+        
+        [JsonConstructor]
+        public ProductPriceChanged(long price, DateTimeOffset validOn) : base(validOn, 0)
+            => Price = price;
 
         public override bool Equals(object other)
         {

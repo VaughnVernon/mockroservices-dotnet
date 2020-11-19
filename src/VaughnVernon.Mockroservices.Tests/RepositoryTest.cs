@@ -65,7 +65,6 @@ namespace VaughnVernon.Mockroservices.Tests
         public PersonES PersonOfId(string id)
         {
             var stream = reader.StreamFor(id);
-
             return new PersonES(ToSourceStream<DomainEvent>(stream.Stream), stream.StreamVersion);
         }
         
