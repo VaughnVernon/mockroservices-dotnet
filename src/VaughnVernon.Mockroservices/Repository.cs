@@ -41,9 +41,9 @@ namespace VaughnVernon.Mockroservices
                     new DateTimeOffset(DateTimeOffset.Now.Year,
                         DateTimeOffset.Now.Month,
                         DateTimeOffset.Now.Day,
-                        0,
-                        0,
-                        0,
+                        23,
+                        59,
+                        59,
                         TimeSpan.Zero));
 
         protected IEnumerable<T> ToSourceStream<T>(IEnumerable<EntryValue> stream, DateTimeOffset validOn) where T : DomainEvent
