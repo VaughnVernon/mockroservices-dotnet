@@ -37,14 +37,7 @@ namespace VaughnVernon.Mockroservices
         }
 
         protected IEnumerable<T> ToSourceStream<T>(IEnumerable<EntryValue> stream) where T : DomainEvent
-            => ToSourceStream<T>(stream,
-                    new DateTimeOffset(DateTimeOffset.Now.Year,
-                        DateTimeOffset.Now.Month,
-                        DateTimeOffset.Now.Day,
-                        23,
-                        59,
-                        59,
-                        TimeSpan.Zero));
+            => ToSourceStream<T>(stream, DateTimeOffset.MaxValue);
 
         protected IEnumerable<T> ToSourceStream<T>(IEnumerable<EntryValue> stream, DateTimeOffset validOn) where T : DomainEvent
         {
