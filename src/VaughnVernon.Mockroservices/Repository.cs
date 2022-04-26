@@ -20,7 +20,7 @@ namespace VaughnVernon.Mockroservices
 {
     public abstract class Repository
     {
-        protected EntryBatch ToBatch<T>(IEnumerable<T> sources) where T : DomainEvent
+        protected EntryBatch ToBatch<T>(IEnumerable<T> sources) where T : ISourceType
         {
             var localSources = sources.ToList();
             var batch = new EntryBatch(localSources.Count);
@@ -36,10 +36,10 @@ namespace VaughnVernon.Mockroservices
             return batch;
         }
 
-        protected IEnumerable<T> ToSourceStream<T>(IEnumerable<EntryValue> stream) where T : DomainEvent
+        protected IEnumerable<T> ToSourceStream<T>(IEnumerable<EntryValue> stream) where T : ISourceType
             => ToSourceStream<T>(stream, DateTimeOffset.MaxValue);
 
-        protected IEnumerable<T> ToSourceStream<T>(IEnumerable<EntryValue> stream, DateTimeOffset validOn) where T : DomainEvent
+        protected IEnumerable<T> ToSourceStream<T>(IEnumerable<EntryValue> stream, DateTimeOffset validOn) where T : ISourceType
         {
             var entryValues = stream.ToList();
             var sourceStream = new List<T>(entryValues.Count);
