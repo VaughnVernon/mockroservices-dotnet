@@ -14,8 +14,9 @@
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using VaughnVernon.Mockroservices.Exchange;
 
-namespace VaughnVernon.Mockroservices.Tests
+namespace VaughnVernon.Mockroservices.Tests.MessageBus
 {
     [TestClass]
     public class MessageExchangeReaderTest
