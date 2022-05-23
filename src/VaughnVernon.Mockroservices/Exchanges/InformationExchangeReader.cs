@@ -17,7 +17,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
-namespace VaughnVernon.Mockroservices.Exchange
+namespace VaughnVernon.Mockroservices.Exchanges
 {
     public abstract class InformationExchangeReader
     {
