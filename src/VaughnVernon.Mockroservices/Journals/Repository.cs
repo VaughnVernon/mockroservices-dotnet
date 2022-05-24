@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Journals
 {
     public abstract class Repository
     {

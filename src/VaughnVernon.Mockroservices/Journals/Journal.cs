@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Journals
 {
     public class Journal
     {
