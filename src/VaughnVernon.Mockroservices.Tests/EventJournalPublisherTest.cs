@@ -15,6 +15,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Threading;
+using VaughnVernon.Mockroservices.Journals;
 
 namespace VaughnVernon.Mockroservices.Tests
 {
