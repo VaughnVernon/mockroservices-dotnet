@@ -13,6 +13,7 @@
 //   limitations under the License.
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using VaughnVernon.Mockroservices.Journals;
 
 namespace VaughnVernon.Mockroservices.Tests
 {
