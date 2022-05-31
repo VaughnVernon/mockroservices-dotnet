@@ -13,6 +13,7 @@
 //   limitations under the License.
 
 using System.Collections.Generic;
+using VaughnVernon.Mockroservices.Journals;
 
 namespace VaughnVernon.Mockroservices
 {
