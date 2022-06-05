@@ -14,7 +14,7 @@
 
 using System;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Model
 {
     public interface ISourceType
     {
