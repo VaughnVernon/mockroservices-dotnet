@@ -12,12 +12,12 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+using System;
 using JsonNet.PrivateSettersContractResolvers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Serializations
 {
     public class Serialization
     {

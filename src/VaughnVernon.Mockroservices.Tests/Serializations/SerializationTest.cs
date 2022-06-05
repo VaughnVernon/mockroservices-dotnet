@@ -14,6 +14,7 @@
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using VaughnVernon.Mockroservices.Serializations;
 
 namespace VaughnVernon.Mockroservices.Tests.Serializations
 {
@@ -25,11 +26,11 @@ namespace VaughnVernon.Mockroservices.Tests.Serializations
         {
             var person1 = new Person("First Middle Last, Jr.", DateTime.Now);
             Assert.IsNotNull(person1);
-            var jsonPerson1 = Mockroservices.Serialization.Serialize(person1);
-            var person2 = Mockroservices.Serialization.Deserialize<Person>(jsonPerson1);
+            var jsonPerson1 = Serialization.Serialize(person1);
+            var person2 = Serialization.Deserialize<Person>(jsonPerson1);
             Assert.IsNotNull(person2);
             Assert.AreEqual(person1, person2);
-            var jsonPerson2 = Mockroservices.Serialization.Serialize(person2);
+            var jsonPerson2 = Serialization.Serialize(person2);
             Assert.AreEqual(jsonPerson1, jsonPerson2);
         }
 
@@ -37,8 +38,8 @@ namespace VaughnVernon.Mockroservices.Tests.Serializations
         public void TestDeserializationToClientClass()
         {
             var person = new Person("First Middle Last, Jr.", DateTime.Now);
-            var jsonPerson = Mockroservices.Serialization.Serialize(person);
-            var clientPerson = Mockroservices.Serialization.Deserialize<ClientPerson>(jsonPerson);
+            var jsonPerson = Serialization.Serialize(person);
+            var clientPerson = Serialization.Deserialize<ClientPerson>(jsonPerson);
             Assert.AreEqual(person.Name, clientPerson.Name);
             Assert.AreEqual(person.BirthDate, clientPerson.BirthDate);
         }
@@ -47,8 +48,8 @@ namespace VaughnVernon.Mockroservices.Tests.Serializations
         public void TestDeserializationAgainstPrivateSetter()
         {
             var person = new Person("First Middle Last, Jr.", DateTime.Now);
-            var jsonPerson = Mockroservices.Serialization.Serialize(person);
-            var clientPerson = Mockroservices.Serialization.Deserialize<ClientPersonWithPrivateSetter>(jsonPerson);
+            var jsonPerson = Serialization.Serialize(person);
+            var clientPerson = Serialization.Deserialize<ClientPersonWithPrivateSetter>(jsonPerson);
             Assert.AreEqual(person.Name, clientPerson.Name);
             Assert.AreEqual(person.BirthDate, clientPerson.BirthDate);
         }
