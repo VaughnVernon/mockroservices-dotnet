@@ -15,9 +15,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using VaughnVernon.Mockroservices.Model;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Model
 {
     public abstract class DomainEvent : ISourceType
     {

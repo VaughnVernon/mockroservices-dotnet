@@ -15,6 +15,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VaughnVernon.Mockroservices.Journals;
+using VaughnVernon.Mockroservices.Model;
 
 namespace VaughnVernon.Mockroservices.Tests.Journals
 {
