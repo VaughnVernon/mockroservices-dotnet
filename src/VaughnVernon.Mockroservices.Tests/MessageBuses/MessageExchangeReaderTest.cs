@@ -15,6 +15,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VaughnVernon.Mockroservices.Exchanges;
+using VaughnVernon.Mockroservices.MessageBuses;
 using VaughnVernon.Mockroservices.Serializations;
 using VaughnVernon.Mockroservices.Tests.Model;
 

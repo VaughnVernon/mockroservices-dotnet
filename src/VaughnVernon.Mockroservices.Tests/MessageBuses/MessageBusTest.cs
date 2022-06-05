@@ -14,6 +14,7 @@
 
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using VaughnVernon.Mockroservices.MessageBuses;
 
 namespace VaughnVernon.Mockroservices.Tests.MessageBuses
 {

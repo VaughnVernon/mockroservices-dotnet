@@ -16,6 +16,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using VaughnVernon.Mockroservices.MessageBuses;
 
 namespace VaughnVernon.Mockroservices.Exchanges
 {
