@@ -67,7 +67,7 @@ public class Topic
             {
                 if (subscribers.Count > 0)
                 {
-                    if (queue.TryDequeue(out Message? message))
+                    if (queue.TryDequeue(out var message))
                     {
                         foreach (var subscriber in subscribers)
                         {

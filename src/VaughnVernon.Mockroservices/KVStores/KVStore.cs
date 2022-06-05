@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.KVStores
 {
 	[SuppressMessage("ReSharper", "InconsistentNaming")]
 	public class KVStore
@@ -30,7 +30,7 @@ namespace VaughnVernon.Mockroservices
 		{
 			try
 			{
-				KVStore openStore = stores[name];
+				var openStore = stores[name];
 				return openStore;
 			}
 			catch (Exception)
@@ -38,7 +38,7 @@ namespace VaughnVernon.Mockroservices
 				// ignore
 			}
 
-			KVStore store = new KVStore(name);
+			var store = new KVStore(name);
 
 			stores.Add(name, store);
 

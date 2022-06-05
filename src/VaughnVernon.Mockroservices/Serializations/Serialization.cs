@@ -23,7 +23,7 @@ namespace VaughnVernon.Mockroservices.Serializations
     {
         public static string Serialize(object? instance)
         {
-            string serialization = JsonConvert.SerializeObject(instance, new JsonSerializerSettings
+            var serialization = JsonConvert.SerializeObject(instance, new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             });

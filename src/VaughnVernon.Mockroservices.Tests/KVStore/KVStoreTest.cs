@@ -26,7 +26,7 @@ namespace VaughnVernon.Mockroservices.Tests.KVStore
 			var value = "v1";
 
 			var name = "test";
-			var store = Mockroservices.KVStore.Open(name);
+			var store = KVStores.KVStore.Open(name);
 
 			store.Put(key, value);
 
