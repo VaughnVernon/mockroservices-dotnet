@@ -20,6 +20,8 @@ namespace VaughnVernon.Mockroservices.Model
 {
     public abstract class Command : ISourceType
     {
+	    public string Id { get; }
+	    
 		public DateTimeOffset OccurredOn { get; }
 		
 		public DateTimeOffset ValidOn { get; }
@@ -36,20 +38,21 @@ namespace VaughnVernon.Mockroservices.Model
 
 		public virtual bool IsNull() => false;
 
-		protected Command()
-			: this(0)
+		protected Command(string id) : this(id, 0)
 		{
 		}
 
-		protected Command(int version)
+		protected Command(string id, int version)
 		{
+			Id = id;
 			OccurredOn = DateTimeOffset.Now;
 			ValidOn = DateTimeOffset.Now;
 			Version = version;
 		}
 		
-		protected Command(DateTimeOffset validOn, int version)
+		protected Command(string id, DateTimeOffset validOn, int version)
 		{
+			Id = id;
 			OccurredOn = DateTimeOffset.Now;
 			ValidOn = validOn;
 			Version = version;
@@ -57,6 +60,10 @@ namespace VaughnVernon.Mockroservices.Model
 
 		internal class NullCommand : Command
 		{
+			public NullCommand() : base(string.Empty)
+			{
+			}
+			
 			public override bool IsNull() => true;
 		}
 	}

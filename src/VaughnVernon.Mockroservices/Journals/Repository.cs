@@ -32,7 +32,7 @@ namespace VaughnVernon.Mockroservices.Journals
                 var assemblyQualifiedName = source?.GetType().AssemblyQualifiedName;
                 if (!string.IsNullOrEmpty(assemblyQualifiedName))
                 {
-                    batch.AddEntry(assemblyQualifiedName!, eventBody);   
+                    batch.AddEntry(assemblyQualifiedName, eventBody);   
                 }
             }
             return batch;
