@@ -8,9 +8,9 @@ public class EntryBatch
 
     public IEnumerable<Entry> Entries => entries;
 
-    public static EntryBatch Of(string type, string body) => new EntryBatch(type, body);
+    public static EntryBatch Of(string type, string body) => new(type, body);
 
-    public static EntryBatch Of(string type, string body, string snapshot) => new EntryBatch(type, body, snapshot);
+    public static EntryBatch Of(string type, string body, string snapshot) => new(type, body, snapshot);
 
     public EntryBatch()
         : this(2)

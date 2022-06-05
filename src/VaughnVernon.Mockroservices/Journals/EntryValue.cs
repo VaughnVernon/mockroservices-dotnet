@@ -47,5 +47,5 @@ public class EntryValue
         Snapshot = snapshot;
     }
 
-    internal EntryValue WithStreamVersion(int streamVersion) => new EntryValue(StreamName, streamVersion, Type, Body, Snapshot);
+    internal EntryValue WithStreamVersion(int streamVersion) => new(StreamName, streamVersion, Type, Body, Snapshot);
 }

@@ -21,7 +21,7 @@ namespace VaughnVernon.Mockroservices
 	[SuppressMessage("ReSharper", "InconsistentNaming")]
 	public class KVStore
 	{
-		private static readonly Dictionary<string, KVStore> stores = new Dictionary<string, KVStore>();
+		private static readonly Dictionary<string, KVStore> stores = new();
 
 		public string Name { get; }
 		private Dictionary<string, string> Store { get; }

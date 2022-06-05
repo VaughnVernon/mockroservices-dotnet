@@ -21,7 +21,7 @@ namespace VaughnVernon.Mockroservices
 {
     public class MessageBus
     {
-        private static readonly Dictionary<string, MessageBus> MessageBuses = new Dictionary<string, MessageBus>();
+        private static readonly Dictionary<string, MessageBus> MessageBuses = new();
 
         private readonly Dictionary<string, Topic> topics;
 

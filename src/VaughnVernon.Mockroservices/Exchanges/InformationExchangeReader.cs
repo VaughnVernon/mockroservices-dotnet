@@ -40,7 +40,7 @@ namespace VaughnVernon.Mockroservices.Exchanges
 
     public class MessageExchangeReader : InformationExchangeReader
     {
-        public static MessageExchangeReader From(Message message) => new MessageExchangeReader(message);
+        public static MessageExchangeReader From(Message message) => new(message);
 
         public MessageExchangeReader(Message message)
             : base(message.Payload)
@@ -64,7 +64,7 @@ namespace VaughnVernon.Mockroservices.Exchanges
             return stringValue == null ? false : Convert.ToBoolean(stringValue);
         }
 
-        public DateTime PayloadDateTimeValue(string key) => new DateTime(PayloadLongValue(key));
+        public DateTime PayloadDateTimeValue(string key) => new(PayloadLongValue(key));
 
         public double PayloadDoubleValue(string key) => DynamicPayload?[key];
 

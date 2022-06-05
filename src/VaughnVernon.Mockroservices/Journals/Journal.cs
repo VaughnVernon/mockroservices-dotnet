@@ -21,7 +21,7 @@ namespace VaughnVernon.Mockroservices.Journals
 {
     public class Journal
     {
-        private static readonly Dictionary<string, Journal> Journals = new Dictionary<string, Journal>();
+        private static readonly Dictionary<string, Journal> Journals = new();
 
         private readonly Dictionary<string, JournalReader> readers;
         private readonly List<EntryValue> store;
@@ -66,7 +66,7 @@ namespace VaughnVernon.Mockroservices.Journals
             return reader;
         }
 
-        public EntryStreamReader StreamReader() => new EntryStreamReader(this);
+        public EntryStreamReader StreamReader() => new(this);
 
         public void Write(EntryBatch batch)
         {

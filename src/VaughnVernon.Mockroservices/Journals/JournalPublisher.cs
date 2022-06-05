@@ -10,11 +10,8 @@ public class JournalPublisher
     private readonly JournalReader reader;
     private readonly Topic topic;
 
-    public static JournalPublisher From(
-        string journalName,
-        string messageBusName,
-        string topicName) =>
-        new JournalPublisher(journalName, messageBusName, topicName);
+    public static JournalPublisher From(string journalName, string messageBusName, string topicName) =>
+        new(journalName, messageBusName, topicName);
 
     public void Close() => closed = true;
 
