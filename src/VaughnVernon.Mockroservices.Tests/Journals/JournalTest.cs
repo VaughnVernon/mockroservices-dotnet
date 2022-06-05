@@ -17,10 +17,10 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VaughnVernon.Mockroservices.Journals;
 
-namespace VaughnVernon.Mockroservices.Tests
+namespace VaughnVernon.Mockroservices.Tests.Journals
 {
     [TestClass]
-    public class EventJournalTest
+    public class JournalTest
     {
         [TestMethod]
         public void TestEventJournalOpenClose()

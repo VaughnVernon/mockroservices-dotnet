@@ -14,7 +14,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace VaughnVernon.Mockroservices.Tests
+namespace VaughnVernon.Mockroservices.Tests.KVStore
 {
 	[TestClass]
 	public class KVStoreTest
@@ -26,7 +26,7 @@ namespace VaughnVernon.Mockroservices.Tests
 			var value = "v1";
 
 			var name = "test";
-			var store = KVStore.Open(name);
+			var store = Mockroservices.KVStore.Open(name);
 
 			store.Put(key, value);
 

@@ -13,11 +13,11 @@
 //   limitations under the License.
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 
-namespace VaughnVernon.Mockroservices.Tests
+namespace VaughnVernon.Mockroservices.Tests.Model
 {
     [TestClass]
     public class EventSourcedRootEntityTest
