@@ -15,6 +15,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using VaughnVernon.Mockroservices.Model;
 
 namespace VaughnVernon.Mockroservices.Tests
 {

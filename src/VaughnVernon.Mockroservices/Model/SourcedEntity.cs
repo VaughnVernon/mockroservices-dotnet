@@ -15,7 +15,7 @@
 using System.Collections.Generic;
 using VaughnVernon.Mockroservices.Journals;
 
-namespace VaughnVernon.Mockroservices
+namespace VaughnVernon.Mockroservices.Model
 {
     public abstract class SourcedEntity<TSource>
     {
